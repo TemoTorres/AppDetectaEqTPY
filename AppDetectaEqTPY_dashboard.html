@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DET-EQ TPY | Dashboard</title>
-    <link rel="manifest" href="AppDetectaEqTPY_manifest.json?v=3">
+    <link rel="manifest" href="AppDetectaEqTPY_manifest.json?v=4">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="DET-EQ TPY">
-    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png?v=3">
+    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png?v=4">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS -->
@@ -77,33 +77,40 @@
     <!-- Header -->
     <header
         class="flex items-center justify-between mb-2 px-6 py-3 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-50 border-b border-white/5">
-        <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2 md:gap-6 max-w-[70%] select-none">
             <!-- Logotipo 75 Años -->
-            <div class="w-16 h-16 md:w-24 md:h-24 flex items-center justify-center">
+            <div class="w-12 h-12 md:w-24 md:h-24 flex items-center justify-center flex-shrink-0">
                 <img src="logo_tepeyac_75.jpg" alt="Tepeyac 75 Años" class="max-w-full max-h-full object-contain"
                     style="filter: invert(1) hue-rotate(180deg); mix-blend-mode: screen;"
-                    onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-emerald-500/10 rounded-xl flex items-center justify-center text-[#A5CF45] font-black text-3xl text-center leading-tight\'>75<br><span class=\'text-[10px] uppercase\'>Años</span></div>'">
+                    onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-emerald-500/10 rounded-xl flex items-center justify-center text-[#A5CF45] font-black text-xl md:text-3xl text-center leading-tight\'>75<br><span class=\'text-[8px] md:text-[10px] uppercase\'>Años</span></div>'">
             </div>
-            <div class="flex flex-col justify-center">
-                <h1 class="text-base md:text-2xl font-black tracking-tighter uppercase leading-none mb-0.5"
+            <div class="flex flex-col justify-center overflow-hidden">
+                <h1 class="text-sm md:text-2xl font-black tracking-tighter uppercase leading-none mb-0.5 truncate"
                     style="color: #A5CF45;">
                     AppDetectaEqTPY</h1>
                 <div class="flex flex-col">
-                    <span class="text-[7px] md:text-[8px] font-bold uppercase tracking-widest leading-tight -mt-0.5"
+                    <span
+                        class="text-[6px] md:text-[8px] font-bold uppercase tracking-widest leading-tight -mt-0.5 truncate"
                         style="color: #A5CF45;">
-                        Ing. Cuauhtémoc Torres / Antigravity
+                        Torres / Antigravity
                     </span>
-                    <span class="text-xs md:text-lg font-black leading-tight mt-1" style="color: #389B42;">
+                    <span class="text-[10px] md:text-lg font-black leading-tight mt-0.5 md:mt-1 truncate"
+                        style="color: #389B42;">
                         Fertilizantes Tepeyac
                     </span>
                 </div>
             </div>
         </div>
-        <div class="flex items-center gap-4">
-            <span id="connection-status" class="hidden md:flex items-center gap-2 text-xs text-emerald-400">
-                <span class="w-2 h-2 bg-emerald-400 rounded-full status-pulse"></span>
-                Sincronizado
-            </span>
+        <div class="flex items-center gap-1 md:gap-4">
+            <div class="flex flex-col items-end mr-1 md:mr-0">
+                <div id="stat-last-mobile"
+                    class="text-[8px] md:hidden font-bold text-slate-500 uppercase tracking-tighter leading-none mb-1">
+                    --</div>
+                <span id="connection-status" class="hidden md:flex items-center gap-2 text-xs text-emerald-400">
+                    <span class="w-2 h-2 bg-emerald-400 rounded-full status-pulse"></span>
+                    Sincronizado
+                </span>
+            </div>
             <button onclick="fetchData()" class="p-2 hover:bg-slate-800 rounded-full transition-colors"
                 title="Refrescar">
                 <i data-lucide="refresh-cw" class="w-5 h-5"></i>
@@ -127,29 +134,36 @@
     <main class="max-w-7xl mx-auto px-2 py-2 md:px-8 md:py-4">
 
         <!-- Stats Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-6 mb-4">
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-3 md:gap-6 mb-4">
             <div class="p-4 md:p-6 rounded-2xl border border-slate-800 bg-slate-800/50">
-                <p class="text-slate-400 text-[10px] md:text-sm mb-1 uppercase tracking-wider font-bold">Total Equipos
+                <p class="text-slate-400 text-[9px] md:text-sm mb-1 uppercase tracking-wider font-bold">Total Equipos
                 </p>
                 <h2 id="stat-total" class="text-2xl md:text-3xl font-bold">--</h2>
             </div>
             <div class="p-4 md:p-6 rounded-2xl border border-slate-800 bg-slate-800/50 border-emerald-500/30">
-                <div class="flex flex-col h-full justify-between gap-2">
+                <div class="flex flex-col h-full justify-between gap-1">
                     <div class="flex items-center justify-between cursor-pointer group"
                         onclick="setUpdateFilter('today')">
                         <span
-                            class="text-emerald-400 text-[9px] md:text-[10px] uppercase font-bold tracking-wider group-hover:translate-x-0.5 transition-transform">En
-                            Línea <span class="opacity-60">Hoy</span></span>
-                        <span id="stat-today" class="text-xl md:text-2xl font-bold text-emerald-400">--</span>
+                            class="text-emerald-400 text-[8px] md:text-[10px] uppercase font-bold tracking-wider group-hover:translate-x-0.5 transition-transform">En
+                            Línea <span class="opacity-60 md:hidden">Hoy</span></span>
+                        <span id="stat-today" class="text-lg md:text-2xl font-bold text-emerald-400">--</span>
                     </div>
-                    <div class="pt-2 border-t border-slate-700/50 flex items-center justify-between cursor-pointer group"
+                    <div class="pt-1 border-t border-slate-700/50 flex items-center justify-between cursor-pointer group"
                         onclick="setUpdateFilter('offline')">
                         <span
-                            class="text-rose-400 text-[9px] md:text-[10px] uppercase font-bold tracking-wider group-hover:translate-x-0.5 transition-transform">Fuera
-                            de Línea</span>
+                            class="text-rose-400 text-[8px] md:text-[10px] uppercase font-bold tracking-wider group-hover:translate-x-0.5 transition-transform">Offline</span>
                         <span id="stat-offline" class="text-lg md:text-xl font-bold text-rose-400">--</span>
                     </div>
                 </div>
+            </div>
+            <div class="p-4 md:p-6 rounded-2xl border border-slate-800 bg-slate-800/50">
+                <p class="text-slate-400 text-[9px] md:text-sm mb-1 uppercase tracking-wider font-bold">Laptops</p>
+                <h2 id="stat-laptops" class="text-2xl md:text-3xl font-bold text-brand">--</h2>
+            </div>
+            <div class="p-4 md:p-6 rounded-2xl border border-slate-800 bg-slate-800/50">
+                <p class="text-slate-400 text-[9px] md:text-sm mb-1 uppercase tracking-wider font-bold">Desktops</p>
+                <h2 id="stat-desktops" class="text-2xl md:text-3xl font-bold text-indigo-400">--</h2>
             </div>
             <div
                 class="hidden md:flex p-6 rounded-2xl border border-slate-800 bg-slate-800/50 flex-col items-center justify-center">
@@ -176,15 +190,7 @@
                     </div>
                 </div>
             </div>
-            <div class="p-4 md:p-6 rounded-2xl border border-slate-800 bg-slate-800/50">
-                <p class="text-slate-400 text-[10px] md:text-sm mb-1 uppercase tracking-wider font-bold">Laptops</p>
-                <h2 id="stat-laptops" class="text-2xl md:text-3xl font-bold text-brand">--</h2>
-            </div>
-            <div class="p-4 md:p-6 rounded-2xl border border-slate-800 bg-slate-800/50">
-                <p class="text-slate-400 text-[10px] md:text-sm mb-1 uppercase tracking-wider font-bold">Desktops</p>
-                <h2 id="stat-desktops" class="text-2xl md:text-3xl font-bold text-indigo-400">--</h2>
-            </div>
-            <div class="p-4 md:p-6 rounded-2xl border border-slate-800 bg-slate-800/50">
+            <div class="hidden md:flex p-6 rounded-2xl border border-slate-800 bg-slate-800/50">
                 <p class="text-slate-400 text-[9px] md:text-sm mb-1 uppercase tracking-wider font-bold">Último Reporte
                 </p>
                 <h2 id="stat-last" class="text-base md:text-xl font-medium mt-1">--</h2>
@@ -507,23 +513,23 @@
                 return `
                 <tr class="hover:bg-slate-800/30 transition-colors group">
                     <td class="p-3 md:p-4">
-                        <div class="font-bold text-brand text-xs md:text-sm">${item.ServiceTag || 'S/N'}</div>
-                        <div class="text-[10px] text-slate-500 md:hidden">${item.NumeroEmpleado || '---'}</div>
+                        <div class="font-bold text-brand text-sm md:text-sm">${item.ServiceTag || 'S/N'}</div>
+                        <div class="text-xs text-slate-500 md:hidden">${item.NumeroEmpleado || '---'}</div>
                     </td>
                     <td class="hidden md:table-cell p-4">
                         <div class="font-medium text-slate-200">${item.NumeroEmpleado || '---'}</div>
                         <div class="text-xs text-slate-500">${item.correo || ''}</div>
                     </td>
                     <td class="p-3 md:p-4">
-                        <div class="text-[10px] md:text-xs font-bold text-slate-200">${item.cpu || 'CPU'} | ${item.ram_gb || '0'}GB</div>
-                        <div class="text-[9px] md:text-[10px] font-bold ${p.text} uppercase tracking-tighter">Perf: ${p.l}</div>
+                        <div class="text-xs md:text-xs font-bold text-slate-200">${item.cpu || 'CPU'} | ${item.ram_gb || '0'}GB</div>
+                        <div class="text-[10px] md:text-[10px] font-bold ${p.text} uppercase tracking-tighter">Perf: ${p.l}</div>
                     </td>
                     <td class="hidden md:table-cell p-4">
                         <div class="text-[10px] text-slate-500">Bat: <span class="${batCol}">${item.Saludbateria || 100}%</span></div>
                         <div class="text-[10px] text-slate-500">Disco: ${item.pct_disco || 0}%</div>
                     </td>
                     <td class="p-3 md:p-4 text-right">
-                        <div class="font-mono text-slate-300 text-[10px] md:text-sm">${formatDate(item.FechaActualizacion)}</div>
+                        <div class="font-mono text-slate-300 text-xs md:text-sm">${formatDate(item.FechaActualizacion)}</div>
                     </td>
                 </tr>`;
             }).join('');
@@ -556,7 +562,11 @@
             document.getElementById('stat-offline').innerText = data.length - todayUpdates.length;
 
             if (data.length > 0) {
-                document.getElementById('stat-last').innerText = formatDate(data[0].FechaActualizacion);
+                const lastTime = formatDate(data[0].FechaActualizacion);
+                document.getElementById('stat-last').innerText = lastTime;
+                if (document.getElementById('stat-last-mobile')) {
+                    document.getElementById('stat-last-mobile').innerText = lastTime;
+                }
             }
         }
 
