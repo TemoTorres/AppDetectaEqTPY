@@ -4,7 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | AppDetectaEqTPY</title>
+    <title>DET-EQ TPY</title>
+    <link rel="manifest" href="AppDetectaEqTPY_manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DET-EQ TPY">
+    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS -->
@@ -138,6 +143,15 @@
                 loginBtn.innerHTML = 'INICIAR SESIÓN';
             }
         });
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./AppDetectaEqTPY_sw.js')
+                    .then(reg => console.log('SW Registered', reg))
+                    .catch(err => console.log('SW Error', err));
+            });
+        }
 
         // Initialize Icons
         lucide.createIcons();
