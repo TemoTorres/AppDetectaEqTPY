@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AppDetectaEqTPY | Dashboard</title>
+    <link rel="manifest" href="AppDetectaEqTPY_manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AppDetectaEqTPY">
+    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --brand-green: #4B9B42;
+            --brand-green-dark: #1b5e20;
+            --brand-brown: #6D4C41;
+        }
+
+        .text-brand {
+            color: var(--brand-green);
+        }
+
+        .bg-brand {
+            background-color: var(--brand-green);
+        }
+
+        .border-brand {
+            border-color: var(--brand-green);
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+        }
+
+        .dark-glass {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+    <!-- Header -->
+    <header
+        class="flex items-center justify-between mb-2 px-6 py-3 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-50 border-b border-white/5">
+        <div class="flex items-center gap-6">
+            <!-- Logotipo 75 Años -->
+            <div class="w-16 h-16 md:w-24 md:h-24 flex items-center justify-center">
+                <img src="logo_tepeyac_75.jpg" alt="Tepeyac 75 Años" class="max-w-full max-h-full object-contain"
+                    style="filter: invert(1) hue-rotate(180deg); mix-blend-mode: screen;"
+                    onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-emerald-500/10 rounded-xl flex items-center justify-center text-[#A5CF45] font-black text-3xl text-center leading-tight\'>75<br><span class=\'text-[10px] uppercase\'>Años</span></div>'">
+            </div>
+            <div class="flex flex-col justify-center">
+                <h1 class="text-base md:text-2xl font-black tracking-tighter uppercase leading-none mb-0.5"
+                    style="color: #A5CF45;">
+                    AppDetectaEqTPY</h1>
+                <div class="flex flex-col">
+                    <span class="text-[7px] md:text-[8px] font-bold uppercase tracking-widest leading-tight -mt-0.5"
+                        style="color: #A5CF45;">
+                        Ing. Cuauhtémoc Torres / Antigravity
+                    </span>
+                    <span class="text-xs md:text-lg font-black leading-tight mt-1" style="color: #389B42;">
+                        Fertilizantes Tepeyac
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="connection-status" class="hidden md:flex items-center gap-2 text-xs text-emerald-400">
+                <span class="w-2 h-2 bg-emerald-400 rounded-full status-pulse"></span>
+                Sincronizado
+            </span>
+            <button onclick="fetchData()" class="p-2 hover:bg-slate-800 rounded-full transition-colors"
+                title="Refrescar">
+                <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+            </button>
+            <button id="adminBtn" onclick="toggleAdminPanel()"
+                class="hidden p-2 hover:bg-indigo-500/20 text-indigo-400 rounded-full transition-colors"
+                title="Administración">
+                <i data-lucide="shield-check" class="w-5 h-5"></i>
+            </button>
+            <button onclick="handleLogout()"
+                class="p-2 hover:bg-rose-500/20 text-rose-400 rounded-full transition-colors" title="Cerrar Sesión">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-2 py-2 md:px-8 md:py-4">
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-6 mb-4">
+            <div class="p-4 md:p-6 rounded-2xl border border-slate-800 bg-slate-800/50">
+                <p class="text-slate-400 text-[10px] md:text-sm mb-1 uppercase tracking-wider font-bold">Total Equipos
+                </p>
+                <h2 id="stat-total" class="text-2xl md:text-3xl font-bold">--</h2>
+            </div>
+            <div class="p-4 md:p-6 rounded-2xl border border-slate-800 bg-slate-800/50 border-emerald-500/30">
+                <div class="flex flex-col h-full justify-between gap-2">
+                    <div class="flex items-center justify-between cursor-pointer group"
+                        onclick="setUpdateFilter('today')">
+                        <span
+                            class="text-emerald-400 text-[9px] md:text-[10px] uppercase font-bold tracking-wider group-hover:translate-x-0.5 transition-transform">En
+                            Línea <span class="opacity-60">Hoy</span></span>
+                        <span id="stat-today" class="text-xl md:text-2xl font-bold text-emerald-400">--</span>
+                    </div>
+                    <div class="pt-2 border-t border-slate-700/50 flex items-center justify-between cursor-pointer group"
+                        onclick="setUpdateFilter('offline')">
+                        <span
+                            class="text-rose-400 text-[9px] md:text-[10px] uppercase font-bold tracking-wider group-hover:translate-x-0.5 transition-transform">Fuera
+                            de Línea</span>
+                        <span id="stat-offline" class="text-lg md:text-xl font-bold text-rose-400">--</span>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="hidden md:flex p-6 rounded-2xl border border-slate-800 bg-slate-800/50 flex-col items-center justify-center">
+                <p class="text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-3">Performance</p>
+                <div class="flex flex-col items-center gap-1.5 w-full">
+                    <div class="flex items-center justify-center gap-6 mb-1">
+                        <span id="btn-perf-g" title="Filtrar Excelente" onclick="setPerfFilter('G')"
+                            class="w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)] cursor-pointer hover:scale-125 transition-transform"></span>
+                        <span id="btn-perf-y" title="Filtrar Medio" onclick="setPerfFilter('Y')"
+                            class="w-4 h-4 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)] cursor-pointer hover:scale-125 transition-transform"></span>
+                        <span id="btn-perf-r" title="Filtrar Bajo" onclick="setPerfFilter('R')"
+                            class="w-4 h-4 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.3)] cursor-pointer hover:scale-125 transition-transform"></span>
+                    </div>
+                    <div class="flex items-center justify-center gap-6">
+                        <span id="stat-perf-g"
+                            class="text-xl font-bold text-slate-100 w-4 text-center cursor-pointer hover:text-emerald-400 transition-colors"
+                            onclick="setPerfFilter('G')">0</span>
+                        <span id="stat-perf-y"
+                            class="text-xl font-bold text-slate-100 w-4 text-center cursor-pointer hover:text-amber-400 transition-colors"
+                            onclick="setPerfFilter('Y')">0</span>
+                        <span id="stat-perf-r"
+                            class="text-xl font-bold text-slate-100 w-4 text-center cursor-pointer hover:text-rose-400 transition-colors"
+                            onclick="setPerfFilter('R')">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 md:p-6 rounded-2xl border border-slate-800 bg-slate-800/50">
+                <p class="text-slate-400 text-[10px] md:text-sm mb-1 uppercase tracking-wider font-bold">Laptops</p>
+                <h2 id="stat-laptops" class="text-2xl md:text-3xl font-bold text-brand">--</h2>
+            </div>
+            <div class="p-4 md:p-6 rounded-2xl border border-slate-800 bg-slate-800/50">
+                <p class="text-slate-400 text-[10px] md:text-sm mb-1 uppercase tracking-wider font-bold">Desktops</p>
+                <h2 id="stat-desktops" class="text-2xl md:text-3xl font-bold text-indigo-400">--</h2>
+            </div>
+            <div class="p-4 md:p-6 rounded-2xl border border-slate-800 bg-slate-800/50">
+                <p class="text-slate-400 text-[9px] md:text-sm mb-1 uppercase tracking-wider font-bold">Último Reporte
+                </p>
+                <h2 id="stat-last" class="text-base md:text-xl font-medium mt-1">--</h2>
+            </div>
+        </div>
+
+        <!-- Admin Panel (Only for Master Admin) -->
+        <div id="adminPanel" class="hidden animate-in fade-in slide-in-from-top-4 duration-500 mb-6">
+            <div class="glass rounded-2xl p-6 border-indigo-500/30">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-indigo-500/20 p-2 rounded-lg text-indigo-400">
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Gestión de Usuarios</h3>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-widest">Master Admin:
+                            ctorres@gtepeyac.com</p>
+                    </div>
+                </div>
+
+                <form id="createUserForm" class="flex flex-col md:flex-row gap-4 items-end">
+                    <div class="flex-1 w-full">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Correo
+                            Electrónico</label>
+                        <input type="email" id="newEmail" required placeholder="ejemplo@gtepeyac.com"
+                            class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                    </div>
+                    <div class="flex-1 w-full">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Contraseña
+                            Temporal</label>
+                        <input type="password" id="newPass" required placeholder="Mín. 6 caracteres"
+                            class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                    </div>
+                    <button type="submit" id="createBtn"
+                        class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-8 py-2.5 rounded-xl transition-all shadow-lg flex items-center gap-2">
+                        <span>DAR DE ALTA</span>
+                        <i data-lucide="user-plus" class="w-4 h-4"></i>
+                    </button>
+                </form>
+                <div id="adminStatus" class="hidden mt-4 text-xs font-bold py-2 px-4 rounded-lg"></div>
+            </div>
+        </div>
+
+        <!-- Search & Filters -->
+        <div class="mb-4 flex flex-col md:flex-row gap-2 md:gap-4">
+            <div class="relative flex-1">
+                <i data-lucide="search"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-slate-500"></i>
+                <input type="text" id="searchInput" placeholder="Serie, Empleado, Empresa..."
+                    class="w-full bg-slate-800 border-none rounded-xl py-2 md:py-3 pl-10 pr-4 text-xs md:text-sm focus:ring-2 focus:ring-green-500 transition-all outline-none">
+            </div>
+            <div class="flex gap-2">
+                <select id="filterType"
+                    class="flex-1 bg-slate-800 rounded-xl px-3 py-2 md:px-4 md:py-3 text-[10px] md:text-sm border-none outline-none focus:ring-2 focus:ring-green-500 cursor-pointer">
+                    <option value="all">Tipos</option>
+                    <option value="Laptop">Laptops</option>
+                    <option value="Desktop">Desktops</option>
+                </select>
+                <select id="filterDisk"
+                    class="flex-1 bg-slate-800 rounded-xl px-3 py-2 md:px-4 md:py-3 text-[10px] md:text-sm border-none outline-none focus:ring-2 focus:ring-green-500 cursor-pointer">
+                    <option value="all">Discos</option>
+                    <option value="SSD">SSD</option>
+                    <option value="HDD">HDD</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Filter Indicator Banner -->
+        <div id="filterIndicator" class="mb-4 hidden">
+            <div
+                class="bg-slate-800/80 border border-slate-700/50 rounded-xl px-4 py-2 flex items-center justify-between">
+                <div class="flex items-center gap-2 overflow-hidden">
+                    <i data-lucide="filter" class="w-3 h-3 text-green-500 flex-shrink-0"></i>
+                    <p class="text-[10px] md:text-sm text-slate-300 truncate">
+                        <span id="filterText" class="font-medium text-slate-100">---</span>
+                    </p>
+                    <span id="filterCount" class="font-bold text-brand ml-2 text-xs md:text-sm">0</span>
+                </div>
+                <button onclick="clearFilters()"
+                    class="text-[9px] md:text-xs font-bold text-rose-400 ml-2 whitespace-nowrap">
+                    X LIMPIAR
+                </button>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="rounded-2xl border border-slate-800 bg-slate-900/50 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs md:text-sm">
+                    <thead class="bg-slate-800/50 text-slate-400 font-medium">
+                        <tr>
+                            <th class="p-3 md:p-4">Service Tag / Equipo</th>
+                            <th class="hidden md:table-cell p-4">Empleado / Correo</th>
+                            <th class="p-3 md:p-4">HW / Performance</th>
+                            <th class="hidden md:table-cell p-4">Salud Técnica</th>
+                            <th class="p-3 md:p-4 text-right">Actualización</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-800 text-[10px] md:text-sm">
+                        <!-- Data will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="loading" class="p-8 md:p-12 text-center text-slate-500">
+                <div class="inline-block animate-spin mb-4 text-brand"><i data-lucide="loader-2"
+                        class="w-6 h-6 md:w-8 md:h-8"></i>
+                </div>
+                <p class="text-xs md:text-sm">Cargando inventario...</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Supabase Config
+        const SUPABASE_URL = "https://ytwwbhwlofycqdshbmqo.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0d3diaHdsb2Z5Y3Fkc2hibXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5OTc1MTgsImV4cCI6MjA4NzU3MzUxOH0.z0CazrtNQqtg46osa50SjxCpw5aflYHEdmBKEwBxlQs";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let masterData = [];
+
+        async function checkAuth() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Check for Master Admin
+            if (session.user.email === 'ctorres@gtepeyac.com') {
+                document.getElementById('adminBtn').classList.remove('hidden');
+            }
+
+            fetchData();
+        }
+
+        function toggleAdminPanel() {
+            const panel = document.getElementById('adminPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        // Logic to create users (Admin only)
+        document.getElementById('createUserForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('newEmail').value;
+            const password = document.getElementById('newPass').value;
+            const btn = document.getElementById('createBtn');
+            const status = document.getElementById('adminStatus');
+
+            btn.disabled = true;
+            btn.innerHTML = 'Procesando...';
+            status.classList.add('hidden');
+
+            try {
+                // SignUp registers the user and triggers the confirmation email if enabled in Supabase
+                const { error } = await supabaseClient.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        emailRedirectTo: window.location.href // Redirect back to dashboard after verification
+                    }
+                });
+
+                if (error) throw error;
+
+                status.innerText = 'Éxito: Se ha enviado un correo de confirmación a ' + email;
+                status.className = 'mt-4 text-xs font-bold py-2 px-4 rounded-lg bg-emerald-500/20 text-emerald-400';
+                status.classList.remove('hidden');
+                e.target.reset();
+
+            } catch (err) {
+                console.error(err);
+                status.innerText = 'Error: ' + err.message;
+                status.className = 'mt-4 text-xs font-bold py-2 px-4 rounded-lg bg-rose-500/20 text-rose-400';
+                status.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>DAR DE ALTA</span><i data-lucide="user-plus" class="w-4 h-4"></i>';
+                lucide.createIcons();
+            }
+        });
+
+        async function handleLogout() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+        }
+
+        async function fetchData() {
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('tableBody').innerHTML = '';
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('computer_tracking')
+                    .select('*')
+                    .order('FechaActualizacion', { ascending: false });
+
+                if (error) throw error;
+
+                masterData = data;
+                applyFilters();
+                updateStats(data);
+
+            } catch (err) {
+                console.error("Error fetching data:", err);
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+
+        function getPerf(item) {
+            if (item.TipoHD === 'HDD' || item.ram_gb <= 4) return { dot: 'bg-rose-500', text: 'text-rose-500', l: 'Bajo' };
+            if (item.ram_gb <= 8) return { dot: 'bg-amber-500', text: 'text-amber-500', l: 'Medio' };
+            return { dot: 'bg-emerald-500', text: 'text-emerald-500', l: 'Excelente' };
+        }
+
+        function renderData(items) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = items.map(item => {
+                const p = getPerf(item);
+                const batCol = item.Saludbateria < 70 ? 'text-rose-400' : 'text-emerald-400';
+                return `
+                <tr class="hover:bg-slate-800/30 transition-colors group">
+                    <td class="p-3 md:p-4">
+                        <div class="font-bold text-brand">${item.ServiceTag || 'S/N'}</div>
+                        <div class="text-[9px] text-slate-500 md:hidden">${item.NumeroEmpleado || '---'}</div>
+                    </td>
+                    <td class="hidden md:table-cell p-4">
+                        <div class="font-medium text-slate-200">${item.NumeroEmpleado || '---'}</div>
+                        <div class="text-xs text-slate-500">${item.correo || ''}</div>
+                    </td>
+                    <td class="p-3 md:p-4">
+                        <div class="text-[9px] md:text-xs font-bold text-slate-200">${item.cpu || 'CPU'} | ${item.ram_gb || '0'}GB</div>
+                        <div class="text-[8px] md:text-[10px] font-bold ${p.text} uppercase tracking-tighter">Perf: ${p.l}</div>
+                    </td>
+                    <td class="hidden md:table-cell p-4">
+                        <div class="text-[10px] text-slate-500">Bat: <span class="${batCol}">${item.Saludbateria || 100}%</span></div>
+                        <div class="text-[10px] text-slate-500">Disco: ${item.pct_disco || 0}%</div>
+                    </td>
+                    <td class="p-3 md:p-4 text-right">
+                        <div class="font-mono text-slate-300">${formatDate(item.FechaActualizacion)}</div>
+                    </td>
+                </tr>`;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function updateStats(data) {
+            document.getElementById('stat-total').innerText = data.length;
+            document.getElementById('stat-laptops').innerText = data.filter(i => i.TipoEquipo === 'Laptop').length;
+            document.getElementById('stat-desktops').innerText = data.filter(i => i.TipoEquipo === 'Desktop').length;
+
+            const perfR = data.filter(i => i.TipoHD === 'HDD' || i.ram_gb <= 4).length;
+            const perfY = data.filter(i => i.TipoHD !== 'HDD' && i.ram_gb > 4 && i.ram_gb <= 8).length;
+            const perfG = data.filter(i => i.TipoHD !== 'HDD' && i.ram_gb > 8).length;
+
+            if (document.getElementById('stat-perf-g')) {
+                document.getElementById('stat-perf-g').innerText = perfG;
+                document.getElementById('stat-perf-y').innerText = perfY;
+                document.getElementById('stat-perf-r').innerText = perfR;
+            }
+
+            const nowInAZ = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Phoenix' }).format(new Date());
+            const todayUpdates = data.filter(item => {
+                if (!item.FechaActualizacion) return false;
+                const itemDateAZ = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Phoenix' }).format(new Date(item.FechaActualizacion));
+                return itemDateAZ === nowInAZ;
+            });
+
+            document.getElementById('stat-today').innerText = todayUpdates.length;
+            document.getElementById('stat-offline').innerText = data.length - todayUpdates.length;
+
+            if (data.length > 0) {
+                document.getElementById('stat-last').innerText = formatDate(data[0].FechaActualizacion);
+            }
+        }
+
+        function formatDate(str) {
+            if (!str) return "--";
+            const date = new Date(str);
+            return date.toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+        }
+
+        let currentPerfFilter = null;
+        let currentUpdateFilter = null;
+
+        function setUpdateFilter(mode) {
+            currentUpdateFilter = mode;
+            applyFilters();
+        }
+
+        function setPerfFilter(level) {
+            currentPerfFilter = level;
+            applyFilters();
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterType').value = 'all';
+            document.getElementById('filterDisk').value = 'all';
+            currentPerfFilter = null;
+            currentUpdateFilter = null;
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            const typeVal = document.getElementById('filterType').value;
+            const diskVal = document.getElementById('filterDisk').value;
+
+            const filtered = masterData.filter(item => {
+                const searchStr = `${item.ServiceTag} ${item.NumeroEmpleado} ${item.correo}`.toLowerCase();
+                const matchesSearch = !searchVal || searchStr.includes(searchVal);
+                const matchesType = typeVal === 'all' || item.TipoEquipo === typeVal;
+                let matchesDisk = diskVal === 'all' || item.TipoHD === diskVal;
+
+                let matchesPerf = true;
+                if (currentPerfFilter) {
+                    const p = getPerf(item);
+                    const levelMap = { 'G': 'Excelente', 'Y': 'Medio', 'R': 'Bajo' };
+                    matchesPerf = p.l === levelMap[currentPerfFilter];
+                }
+
+                let matchesUpdate = true;
+                if (currentUpdateFilter) {
+                    const nowInAZ = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Phoenix' }).format(new Date());
+                    const itemDateAZ = item.FechaActualizacion ? new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Phoenix' }).format(new Date(item.FechaActualizacion)) : null;
+                    const isToday = itemDateAZ === nowInAZ;
+                    matchesUpdate = currentUpdateFilter === 'today' ? isToday : !isToday;
+                }
+
+                return matchesSearch && matchesType && matchesDisk && matchesPerf && matchesUpdate;
+            });
+
+            updateFilterIndicator(searchVal, typeVal, diskVal, filtered.length);
+            renderData(filtered);
+        }
+
+        function updateFilterIndicator(search, type, disk, count) {
+            const indicator = document.getElementById('filterIndicator');
+            const textEl = document.getElementById('filterText');
+            const countEl = document.getElementById('filterCount');
+
+            let activeFilters = [];
+            if (search) activeFilters.push(search);
+            if (type !== 'all') activeFilters.push(type);
+            if (disk !== 'all') activeFilters.push(disk);
+            if (currentUpdateFilter) activeFilters.push(currentUpdateFilter === 'today' ? 'Online' : 'Offline');
+
+            if (activeFilters.length > 0) {
+                indicator.classList.remove('hidden');
+                textEl.innerText = activeFilters.join(' + ');
+                countEl.innerText = count;
+            } else {
+                indicator.classList.add('hidden');
+            }
+        }
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./AppDetectaEqTPY_sw.js')
+                    .then(reg => console.log('SW Registered', reg))
+                    .catch(err => console.log('SW Error', err));
+            });
+        }
+
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('filterType').addEventListener('change', applyFilters);
+        document.getElementById('filterDisk').addEventListener('change', applyFilters);
+
+        window.onload = () => {
+            lucide.createIcons();
+            checkAuth();
+        };
+    </script>
+</body>
+
+</html>
