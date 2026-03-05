@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DET-EQ TPY | Dashboard</title>
-    <link rel="manifest" href="AppDetectaEqTPY_manifest.json?v=4">
+    <link rel="manifest" href="AppDetectaEqTPY_manifest.json?v=5">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="DET-EQ TPY">
-    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png?v=4">
+    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png?v=5">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS -->
@@ -101,33 +101,33 @@
                 </div>
             </div>
         </div>
-        <div class="flex items-center gap-1 md:gap-4">
-            <div class="flex flex-col items-end mr-1 md:mr-0">
-                <div id="stat-last-mobile"
-                    class="text-[8px] md:hidden font-bold text-slate-500 uppercase tracking-tighter leading-none mb-1">
-                    --</div>
+        <div class="flex flex-col items-end gap-1.5 min-w-0">
+            <div id="stat-last-mobile"
+                class="text-[9px] md:hidden font-bold text-slate-400 uppercase tracking-wider leading-none bg-slate-800/40 px-2 py-1 rounded-lg border border-white/5 whitespace-nowrap">
+                --</div>
+            <div class="flex items-center gap-1 md:gap-4">
                 <span id="connection-status" class="hidden md:flex items-center gap-2 text-xs text-emerald-400">
                     <span class="w-2 h-2 bg-emerald-400 rounded-full status-pulse"></span>
                     Sincronizado
                 </span>
+                <button onclick="fetchData()" class="p-2 hover:bg-slate-800 rounded-full transition-colors"
+                    title="Refrescar">
+                    <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                </button>
+                <button onclick="openSettingsModal()" class="p-2 hover:bg-slate-800 rounded-full transition-colors"
+                    title="Configuración de Cuenta">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                </button>
+                <button id="adminBtn" onclick="toggleAdminPanel()"
+                    class="hidden p-2 hover:bg-indigo-500/20 text-indigo-400 rounded-full transition-colors"
+                    title="Administración">
+                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                </button>
+                <button onclick="handleLogout()"
+                    class="p-2 hover:bg-rose-500/20 text-rose-400 rounded-full transition-colors" title="Cerrar Sesión">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
             </div>
-            <button onclick="fetchData()" class="p-2 hover:bg-slate-800 rounded-full transition-colors"
-                title="Refrescar">
-                <i data-lucide="refresh-cw" class="w-5 h-5"></i>
-            </button>
-            <button onclick="openSettingsModal()" class="p-2 hover:bg-slate-800 rounded-full transition-colors"
-                title="Configuración de Cuenta">
-                <i data-lucide="settings" class="w-5 h-5"></i>
-            </button>
-            <button id="adminBtn" onclick="toggleAdminPanel()"
-                class="hidden p-2 hover:bg-indigo-500/20 text-indigo-400 rounded-full transition-colors"
-                title="Administración">
-                <i data-lucide="shield-check" class="w-5 h-5"></i>
-            </button>
-            <button onclick="handleLogout()"
-                class="p-2 hover:bg-rose-500/20 text-rose-400 rounded-full transition-colors" title="Cerrar Sesión">
-                <i data-lucide="log-out" class="w-5 h-5"></i>
-            </button>
         </div>
     </header>
 
