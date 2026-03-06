@@ -1,4 +1,4 @@
-const CACHE_NAME = 'appdetectaeqtpy-v8';
+const CACHE_NAME = 'appdetectaeqtpy-v9';
 const ASSETS = [
     './index.html',
     './AppDetectaEqTPY_dashboard.html',
