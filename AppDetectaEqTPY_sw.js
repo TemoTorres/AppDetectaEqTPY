@@ -1,4 +1,4 @@
-const CACHE_NAME = 'appdetectaeqtpy-v6';
+const CACHE_NAME = 'appdetectaeqtpy-v7';
 const ASSETS = [
     './index.html',
     './AppDetectaEqTPY_dashboard.html',
@@ -35,9 +35,24 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    // Evitar cache para llamadas a la API de Supabase
+    if (event.request.url.includes('supabase.co')) {
+        return;
+    }
+
     event.respondWith(
-        caches.match(event.request).then((response) => {
-            return response || fetch(event.request);
-        })
+        fetch(event.request)
+            .then((response) => {
+                // Si la red funciona, guardamos en caché y devolvemos
+                const resClone = response.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(event.request, resClone);
+                });
+                return response;
+            })
+            .catch(() => {
+                // Si falla la red, buscamos en el caché
+                return caches.match(event.request);
+            })
     );
 });

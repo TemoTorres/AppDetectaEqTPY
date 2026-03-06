@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DET-EQ TPY | Dashboard</title>
-    <link rel="manifest" href="AppDetectaEqTPY_manifest.json?v=6">
+    <link rel="manifest" href="AppDetectaEqTPY_manifest.json?v=7">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="DET-EQ TPY">
-    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png?v=6">
+    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png?v=7">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS -->
@@ -418,7 +418,7 @@
         });
 
         async function handleLogout() {
-            await supabaseClient.signOut();
+            await supabaseClient.auth.signOut();
             window.location.href = 'index.html';
         }
 
