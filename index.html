@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DET-EQ TPY</title>
+    <link rel="manifest" href="AppDetectaEqTPY_manifest.json?v=6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DET-EQ TPY">
+    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png?v=6">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+        }
+
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input-focus:focus {
+            box-shadow: 0 0 0 2px rgba(75, 155, 66, 0.3);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-md animate-in fade-in zoom-in duration-500">
+        <!-- Logo Section -->
+        <div class="flex flex-col items-center mb-8">
+            <div class="w-24 h-24 mb-4">
+                <img src="logo_tepeyac_75.jpg" alt="Logo" class="w-full h-full object-contain"
+                    style="filter: invert(1) hue-rotate(180deg); mix-blend-mode: screen;">
+            </div>
+            <h1 class="text-3xl font-black text-white tracking-widest uppercase" style="color: #A5CF45;">AppDetectaEqTPY
+            </h1>
+            <p class="text-emerald-500/60 text-[10px] uppercase font-bold tracking-[0.3em] mt-1">Acceso Administrativo
+            </p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="glass rounded-3xl p-8 shadow-2xl">
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"
+                        for="email">Correo Electrónico</label>
+                    <div class="relative">
+                        <i data-lucide="mail"
+                            class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500"></i>
+                        <input type="email" id="email" required
+                            class="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-600 outline-none transition-all input-focus"
+                            placeholder="tu@email.com">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"
+                        for="password">Contraseña</label>
+                    <div class="relative">
+                        <i data-lucide="lock"
+                            class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500"></i>
+                        <input type="password" id="password" required
+                            class="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-600 outline-none transition-all input-focus"
+                            placeholder="••••••••">
+                    </div>
+                </div>
+
+                <div id="errorMessage"
+                    class="hidden text-rose-500 text-xs font-bold text-center bg-rose-500/10 py-2 rounded-lg">
+                    Credenciales incorrectas
+                </div>
+
+                <button type="submit" id="loginBtn"
+                    class="w-full bg-[#4B9B42] hover:bg-[#388e3c] text-white font-bold py-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 group">
+                    <span>INICIAR SESIÓN</span>
+                    <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                </button>
+            </form>
+        </div>
+
+        <p class="text-center text-slate-500 text-[10px] uppercase font-medium mt-8 tracking-widest">
+            Fertilizantes Tepeyac <span class="mx-2">|</span> 2026
+        </p>
+    </div>
+
+    <script>
+        // Supabase Config
+        const SUPABASE_URL = "https://ytwwbhwlofycqdshbmqo.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0d3diaHdsb2Z5Y3Fkc2hibXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5OTc1MTgsImV4cCI6MjA4NzU3MzUxOH0.z0CazrtNQqtg46osa50SjxCpw5aflYHEdmBKEwBxlQs";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const errorEl = document.getElementById('errorMessage');
+
+        // Check if already logged in
+        async function checkSession() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                window.location.href = 'AppDetectaEqTPY_dashboard.html';
+            }
+        }
+        checkSession();
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorEl.classList.add('hidden');
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = 'VERIFICANDO...';
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password,
+                });
+
+                if (error) throw error;
+
+                // Success
+                window.location.href = 'AppDetectaEqTPY_dashboard.html';
+
+            } catch (err) {
+                console.error(err);
+                errorEl.innerText = 'Error: ' + (err.message || 'Credenciales inválidas');
+                errorEl.classList.remove('hidden');
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = 'INICIAR SESIÓN';
+            }
+        });
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./AppDetectaEqTPY_sw.js')
+                    .then(reg => console.log('SW Registered', reg))
+                    .catch(err => console.log('SW Error', err));
+            });
+        }
+
+        // Initialize Icons
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
