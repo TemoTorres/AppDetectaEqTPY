@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DET-EQ TPY | Dashboard</title>
-    <link rel="manifest" href="AppDetectaEqTPY_manifest.json?v=10">
+    <link rel="manifest" href="AppDetectaEqTPY_manifest.json?v=11">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="DET-EQ TPY">
-    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png?v=10">
+    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png?v=11">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS -->
@@ -354,6 +354,7 @@
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0d3diaHdsb2Z5Y3Fkc2hibXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5OTc1MTgsImV4cCI6MjA4NzU3MzUxOH0.z0CazrtNQqtg46osa50SjxCpw5aflYHEdmBKEwBxlQs";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let masterData = [];
+        let empMap = {}; // Mapa para búsquedas rápidas de Nombre Empleado
         let currentPerfFilter = null;
         let currentUpdateFilter = null;
         let currentTypeFilter = null;
@@ -483,16 +484,34 @@
             document.getElementById('tableBody').innerHTML = '';
 
             try {
-                const { data, error } = await supabaseClient
+                // Fetch Computer Tracking
+                const trackingReq = supabaseClient
                     .from('computer_tracking')
                     .select('*')
                     .order('FechaActualizacion', { ascending: false });
 
-                if (error) throw error;
+                // Fetch Empleados (Only IDs & Names for speed)
+                const empReq = supabaseClient
+                    .from('TablaEmpleados')
+                    .select('NumeroEmpleado, Nombre');
 
-                masterData = data;
+                // Execute both queries simultaneously
+                const [trackingRes, empRes] = await Promise.all([trackingReq, empReq]);
+
+                if (trackingRes.error) throw trackingRes.error;
+                if (empRes.error) throw empRes.error;
+
+                // Build Empleado Map: { "1234": "JUAN PEREZ", ... }
+                empMap = {};
+                if (empRes.data) {
+                    empRes.data.forEach(emp => {
+                        empMap[emp.NumeroEmpleado] = emp.Nombre;
+                    });
+                }
+
+                masterData = trackingRes.data;
                 applyFilters();
-                updateStats(data);
+                updateStats(masterData);
 
             } catch (err) {
                 console.error("Error fetching data:", err);
@@ -512,15 +531,18 @@
             tableBody.innerHTML = items.map(item => {
                 const p = getPerf(item);
                 const batCol = item.Saludbateria < 70 ? 'text-rose-400' : 'text-emerald-400';
+                const empName = empMap[item.NumeroEmpleado] || 'SIN ASIGNAR';
+
                 return `
                 <tr class="hover:bg-slate-800/30 transition-colors group">
                     <td class="p-3 md:p-4">
                         <div class="font-bold text-brand text-sm md:text-sm">${item.ServiceTag || 'S/N'}</div>
-                        <div class="text-xs text-slate-500 md:hidden">${item.NumeroEmpleado || '---'}</div>
+                        <div class="text-xs text-slate-400 font-medium md:hidden line-clamp-2 mt-0.5">${empName}</div>
                     </td>
                     <td class="hidden md:table-cell p-4">
                         <div class="font-medium text-slate-200">${item.NumeroEmpleado || '---'}</div>
-                        <div class="text-xs text-slate-500">${item.correo || ''}</div>
+                        <div class="text-[10px] text-slate-400 font-medium mt-0.5">${empName}</div>
+                        <div class="text-xs text-slate-500 mt-0.5">${item.correo || ''}</div>
                     </td>
                     <td class="p-3 md:p-4">
                         <div class="text-xs md:text-xs font-bold text-slate-200">${item.cpu || 'CPU'} | ${item.ram_gb || '0'}GB</div>
@@ -607,7 +629,8 @@
             const diskVal = document.getElementById('filterDisk').value;
 
             const filtered = masterData.filter(item => {
-                const searchStr = `${item.ServiceTag} ${item.NumeroEmpleado} ${item.correo}`.toLowerCase();
+                const empName = empMap[item.NumeroEmpleado] || '';
+                const searchStr = `${item.ServiceTag} ${item.NumeroEmpleado} ${empName} ${item.correo}`.toLowerCase();
                 const matchesSearch = !searchVal || searchStr.includes(searchVal);
                 const matchesType = !currentTypeFilter || item.TipoEquipo === currentTypeFilter;
                 let matchesDisk = diskVal === 'all' || item.TipoHD === diskVal;
