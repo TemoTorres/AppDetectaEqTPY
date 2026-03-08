@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DET-EQ TPY | Dashboard</title>
-    <link rel="manifest" href="AppDetectaEqTPY_manifest.json?v=12">
+    <link rel="manifest" href="AppDetectaEqTPY_manifest.json?v=14">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="DET-EQ TPY">
-    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png?v=12">
+    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png?v=14">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS -->
@@ -531,6 +531,7 @@
             tableBody.innerHTML = items.map(item => {
                 const p = getPerf(item);
                 const batCol = item.Saludbateria < 70 ? 'text-rose-400' : 'text-emerald-400';
+                const dskCol = item.pct_disco > 80 ? 'text-rose-400' : (item.pct_disco > 60 ? 'text-amber-400' : 'text-emerald-400');
                 const empName = empMap[item.NumeroEmpleado] || 'SIN ASIGNAR';
 
                 return `
@@ -538,6 +539,7 @@
                     <td class="p-3 md:p-4">
                         <div class="font-bold text-brand text-sm md:text-sm">${item.ServiceTag || 'S/N'}</div>
                         <div class="text-xs text-slate-400 font-medium line-clamp-2 mt-0.5">${empName}</div>
+                        <div class="text-[10px] text-slate-500 font-bold uppercase mt-0.5">${item.TipoEquipo || 'Equipo'}</div>
                     </td>
                     <td class="hidden md:table-cell p-4">
                         <div class="font-medium text-slate-200">${item.NumeroEmpleado || '---'}</div>
@@ -549,10 +551,14 @@
                     </td>
                     <td class="hidden md:table-cell p-4">
                         <div class="text-[10px] text-slate-500">Bat: <span class="${batCol}">${item.Saludbateria || 100}%</span></div>
-                        <div class="text-[10px] text-slate-500">Disco: ${item.pct_disco || 0}%</div>
+                        <div class="text-[10px] text-slate-500">Disco: <span class="${dskCol}">${item.pct_disco || 0}%</span></div>
                     </td>
                     <td class="p-3 md:p-4 text-right">
-                        <div class="font-mono text-slate-300 text-xs md:text-sm">${formatDate(item.FechaActualizacion)}</div>
+                        <div class="hidden md:block font-mono text-slate-300 text-xs md:text-sm">${formatDate(item.FechaActualizacion)}</div>
+                        <div class="md:hidden flex flex-col items-end mt-1">
+                            <div class="text-[11px] font-bold text-slate-200">${item.disk_total_gb || 0} GB</div>
+                            <div class="text-[10px] font-bold ${dskCol} mt-0.5">${item.pct_disco || 0}% Usado</div>
+                        </div>
                     </td>
                 </tr>`;
             }).join('');
