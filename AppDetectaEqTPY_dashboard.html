@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DET-EQ TPY | Dashboard</title>
-    <link rel="manifest" href="AppDetectaEqTPY_manifest.json?v=11">
+    <link rel="manifest" href="AppDetectaEqTPY_manifest.json?v=12">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="DET-EQ TPY">
-    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png?v=11">
+    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png?v=12">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS -->
@@ -75,58 +75,58 @@
 <body class="bg-slate-900 text-slate-100 min-h-screen">
 
     <!-- Header -->
-    <header
-        class="flex items-center justify-between mb-2 px-6 py-3 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-50 border-b border-white/5">
-        <div class="flex items-center gap-2 md:gap-6 max-w-[70%] select-none">
-            <!-- Logotipo 75 Años -->
-            <div class="w-12 h-12 md:w-24 md:h-24 flex items-center justify-center flex-shrink-0">
-                <img src="logo_tepeyac_75.jpg" alt="Tepeyac 75 Años" class="max-w-full max-h-full object-contain"
-                    style="filter: invert(1) hue-rotate(180deg); mix-blend-mode: screen;"
-                    onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-emerald-500/10 rounded-xl flex items-center justify-center text-[#A5CF45] font-black text-xl md:text-3xl text-center leading-tight\'>75<br><span class=\'text-[8px] md:text-[10px] uppercase\'>Años</span></div>'">
-            </div>
-            <div class="flex flex-col justify-center overflow-hidden">
-                <h1 class="text-sm md:text-2xl font-black tracking-tighter uppercase leading-none mb-0.5 truncate"
-                    style="color: #A5CF45;">
-                    AppDetectaEqTPY</h1>
-                <div class="flex flex-col">
-                    <span
-                        class="text-[6px] md:text-[8px] font-bold uppercase tracking-widest leading-tight -mt-0.5 truncate"
+    <header class="mb-2 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-50 border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-2 md:px-8 py-3 flex items-center justify-between w-full">
+            <div class="flex items-center gap-2 md:gap-6 select-none">
+                <!-- Logotipo 75 Años -->
+                <div class="w-12 h-12 md:w-24 md:h-24 flex items-center justify-center flex-shrink-0">
+                    <img src="logo_tepeyac_75.jpg" alt="Tepeyac 75 Años" class="max-w-full max-h-full object-contain"
+                        style="filter: invert(1) hue-rotate(180deg); mix-blend-mode: screen;"
+                        onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-emerald-500/10 rounded-xl flex items-center justify-center text-[#A5CF45] font-black text-xl md:text-3xl text-center leading-tight\'>75<br><span class=\'text-[8px] md:text-[10px] uppercase\'>Años</span></div>'">
+                </div>
+                <div class="flex flex-col justify-center overflow-hidden">
+                    <h1 class="text-sm md:text-2xl font-black tracking-tighter uppercase leading-none truncate"
                         style="color: #A5CF45;">
-                        Torres / Antigravity
-                    </span>
-                    <span class="text-[10px] md:text-lg font-black leading-tight mt-0.5 md:mt-1 truncate"
-                        style="color: #389B42;">
-                        Fertilizantes Tepeyac
-                    </span>
+                        APPDETECTAEQTPY</h1>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] md:text-lg font-black leading-none truncate" style="color: #A5CF45;">
+                            Fertilizantes Tepeyac
+                        </span>
+                        <span class="text-[6px] md:text-[8px] font-bold uppercase tracking-widest leading-none truncate"
+                            style="color: #389B42;">
+                            Ing. Cuauhtémoc Torres S/Antigravity
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="flex flex-col items-end gap-1.5 min-w-0">
-            <div id="stat-last-mobile"
-                class="text-[9px] md:hidden font-bold text-slate-400 uppercase tracking-wider leading-none bg-slate-800/40 px-2 py-1 rounded-lg border border-white/5 whitespace-nowrap">
-                --</div>
-            <div class="flex items-center gap-1 md:gap-4">
-                <span id="connection-status" class="hidden md:flex items-center gap-2 text-xs text-emerald-400">
-                    <span class="w-2 h-2 bg-emerald-400 rounded-full status-pulse"></span>
-                    Sincronizado
-                </span>
-                <button onclick="fetchData()" class="p-2 hover:bg-slate-800 rounded-full transition-colors"
-                    title="Refrescar">
-                    <i data-lucide="refresh-cw" class="w-5 h-5"></i>
-                </button>
-                <button onclick="openSettingsModal()" class="p-2 hover:bg-slate-800 rounded-full transition-colors"
-                    title="Configuración de Cuenta">
-                    <i data-lucide="settings" class="w-5 h-5"></i>
-                </button>
-                <button id="adminBtn" onclick="toggleAdminPanel()"
-                    class="hidden p-2 hover:bg-indigo-500/20 text-indigo-400 rounded-full transition-colors"
-                    title="Administración">
-                    <i data-lucide="shield-check" class="w-5 h-5"></i>
-                </button>
-                <button onclick="handleLogout()"
-                    class="p-2 hover:bg-rose-500/20 text-rose-400 rounded-full transition-colors" title="Cerrar Sesión">
-                    <i data-lucide="log-out" class="w-5 h-5"></i>
-                </button>
+            <div class="flex flex-col items-end gap-1.5 min-w-0">
+                <div id="stat-last-mobile"
+                    class="text-[9px] md:hidden font-bold text-slate-400 uppercase tracking-wider leading-none bg-slate-800/40 px-2 py-1 rounded-lg border border-white/5 whitespace-nowrap">
+                    --</div>
+                <div class="flex items-center gap-1 md:gap-4">
+                    <span id="connection-status" class="hidden md:flex items-center gap-2 text-xs text-emerald-400">
+                        <span class="w-2 h-2 bg-emerald-400 rounded-full status-pulse"></span>
+                        Sincronizado
+                    </span>
+                    <button onclick="fetchData()" class="p-2 hover:bg-slate-800 rounded-full transition-colors"
+                        title="Refrescar">
+                        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="openSettingsModal()" class="p-2 hover:bg-slate-800 rounded-full transition-colors"
+                        title="Configuración de Cuenta">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                    </button>
+                    <button id="adminBtn" onclick="toggleAdminPanel()"
+                        class="hidden p-2 hover:bg-indigo-500/20 text-indigo-400 rounded-full transition-colors"
+                        title="Administración">
+                        <i data-lucide="shield-check" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="handleLogout()"
+                        class="p-2 hover:bg-rose-500/20 text-rose-400 rounded-full transition-colors"
+                        title="Cerrar Sesión">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -537,11 +537,10 @@
                 <tr class="hover:bg-slate-800/30 transition-colors group">
                     <td class="p-3 md:p-4">
                         <div class="font-bold text-brand text-sm md:text-sm">${item.ServiceTag || 'S/N'}</div>
-                        <div class="text-xs text-slate-400 font-medium md:hidden line-clamp-2 mt-0.5">${empName}</div>
+                        <div class="text-xs text-slate-400 font-medium line-clamp-2 mt-0.5">${empName}</div>
                     </td>
                     <td class="hidden md:table-cell p-4">
                         <div class="font-medium text-slate-200">${item.NumeroEmpleado || '---'}</div>
-                        <div class="text-[10px] text-slate-400 font-medium mt-0.5">${empName}</div>
                         <div class="text-xs text-slate-500 mt-0.5">${item.correo || ''}</div>
                     </td>
                     <td class="p-3 md:p-4">
