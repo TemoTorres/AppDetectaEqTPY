@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DET-EQ TPY | Dashboard</title>
-    <link rel="manifest" href="AppDetectaEqTPY_manifest.json?v=15">
+    <link rel="manifest" href="AppDetectaEqTPY_manifest.json?v=16">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="DET-EQ TPY">
-    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png?v=15">
+    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png?v=16">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS -->
@@ -547,9 +547,20 @@
                 return `
                 <tr class="hover:bg-slate-800/30 transition-colors group">
                     <td class="p-3 md:p-4">
-                        <div class="font-bold text-brand text-sm md:text-sm">${item.ServiceTag || 'S/N'}</div>
+                        <!-- Desktop View: Service Tag alone -->
+                        <div class="hidden md:block font-bold text-brand text-sm">${item.ServiceTag || 'S/N'}</div>
+                        <!-- Mobile View: Service Tag + Tipo Equipo (White) -->
+                        <div class="md:hidden flex items-center gap-2">
+                            <span class="font-bold text-brand text-sm">${item.ServiceTag || 'S/N'}</span>
+                            <span class="text-[10px] text-white font-bold uppercase mt-0.5">${item.TipoEquipo || 'Equipo'}</span>
+                        </div>
+                        
                         <div class="text-xs text-slate-400 font-medium line-clamp-2 mt-0.5">${empName}</div>
-                        <div class="text-[10px] text-slate-500 font-bold uppercase mt-0.5">${item.TipoEquipo || 'Equipo'}</div>
+                        
+                        <!-- Desktop View: Tipo Equipo in Gray -->
+                        <div class="hidden md:block text-[10px] text-slate-500 font-bold uppercase mt-0.5">${item.TipoEquipo || 'Equipo'}</div>
+                        <!-- Mobile View: Correo -->
+                        <div class="md:hidden text-[10px] text-slate-500 mt-0.5 line-clamp-1">${item.correo || ''}</div>
                     </td>
                     <td class="hidden md:table-cell p-4">
                         <div class="font-medium text-slate-200">${item.NumeroEmpleado || '---'}</div>
