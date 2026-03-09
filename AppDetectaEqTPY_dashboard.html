@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DET-EQ TPY | Dashboard</title>
-    <link rel="manifest" href="AppDetectaEqTPY_manifest.json?v=16">
+    <link rel="manifest" href="AppDetectaEqTPY_manifest.json?v=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="DET-EQ TPY">
-    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png?v=16">
+    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png?v=1.0">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS -->
@@ -69,7 +69,76 @@
                 opacity: 1;
             }
         }
+
+        /* Long Press Tooltip for Mobile */
+        #mobile-tooltip {
+            position: fixed;
+            z-index: 9999;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(244, 63, 94, 0.5);
+            /* Rose border for alerts */
+            padding: 12px 16px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            backdrop-filter: blur(8px);
+            max-width: 250px;
+            transform: translate(-50%, -100%);
+            margin-top: -20px;
+        }
+
+        #mobile-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid rgba(15, 23, 42, 0.95);
+        }
     </style>
+    <script>
+        // Long Press Logic for Mobile Tooltips
+        let longPressTimer;
+        let tooltipEl;
+
+        function startLongPress(e, text) {
+            if (!text || text === 'Excelente estado' || text === 'Equilibrado') return;
+
+            // Get coordinates for both touch and mouse (for F12 simulator)
+            const x = e.touches ? e.touches[0].clientX : e.clientX;
+            const y = e.touches ? e.touches[0].clientY : e.clientY;
+
+            clearTimeout(longPressTimer);
+            longPressTimer = setTimeout(() => {
+                showMobileTooltip(x, y, text);
+                if (navigator.vibrate) navigator.vibrate(50); // Feedback
+            }, 3000); // 3 Seconds
+        }
+
+        function cancelLongPress() {
+            clearTimeout(longPressTimer);
+            hideMobileTooltip();
+        }
+
+        function showMobileTooltip(x, y, text) {
+            if (!tooltipEl) {
+                tooltipEl = document.createElement('div');
+                tooltipEl.id = 'mobile-tooltip';
+                document.body.appendChild(tooltipEl);
+            }
+            tooltipEl.innerHTML = `<div class="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-1">Razón del Performance</div>
+                                   <div class="text-xs text-white leading-relaxed">${text.replace('Razones: ', '')}</div>`;
+            tooltipEl.style.left = x + 'px';
+            tooltipEl.style.top = y + 'px';
+            tooltipEl.classList.remove('hidden');
+        }
+
+        function hideMobileTooltip() {
+            if (tooltipEl) tooltipEl.classList.add('hidden');
+        }
+    </script>
 </head>
 
 <body class="bg-slate-900 text-slate-100 min-h-screen">
@@ -85,20 +154,25 @@
                         onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-emerald-500/10 rounded-xl flex items-center justify-center text-[#A5CF45] font-black text-xl md:text-3xl text-center leading-tight\'>75<br><span class=\'text-[8px] md:text-[10px] uppercase\'>Años</span></div>'">
                 </div>
                 <div class="flex flex-col justify-center overflow-hidden">
-                    <h1 class="text-sm md:text-2xl font-black tracking-tighter uppercase leading-none truncate"
+                    <h1 class="text-xl md:text-3xl font-black tracking-tighter uppercase leading-none"
                         style="color: #A5CF45;">
                         APPDETECTAEQTPY</h1>
-                    <div class="flex flex-col">
-                        <span class="text-[10px] md:text-lg font-black leading-none truncate" style="color: #A5CF45;">
+                    <div class="flex flex-col mt-1.5">
+                        <span class="text-[10px] md:text-sm font-bold uppercase tracking-[0.2em] leading-none"
+                            style="color: #A5CF45; opacity: 0.9;">
                             Fertilizantes Tepeyac
                         </span>
-                        <span class="text-[6px] md:text-[8px] font-bold uppercase tracking-widest leading-none truncate"
-                            style="color: #389B42;">
-                            Ing. Cuauhtémoc Torres S/Antigravity
-                        </span>
-                        <span class="text-[8px] md:text-[10px] font-bold text-[#389B42] mt-1 uppercase tracking-widest">
-                            Versión v16
-                        </span>
+                        <div class="flex flex-col md:flex-row md:items-center gap-1.5 mt-1.5">
+                            <span class="text-[8px] md:text-[9px] font-bold uppercase tracking-widest leading-none"
+                                style="color: #389B42;">
+                                Ing. Cuauhtémoc Torres
+                            </span>
+                            <span class="hidden md:block w-1 h-1 bg-emerald-500/20 rounded-full"></span>
+                            <span
+                                class="text-[8px] md:text-[9px] font-black uppercase tracking-widest leading-none text-[#389B42]">
+                                Versión 1.0
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -160,22 +234,64 @@
                     </div>
                 </div>
             </div>
-            <div class="p-4 md:p-6 rounded-2xl border border-slate-800 bg-slate-800/50 cursor-pointer group hover:border-brand/40 transition-all"
+            <!-- Laptops (Desktop Only) -->
+            <div class="hidden md:flex flex-col p-6 rounded-2xl border border-slate-800 bg-slate-800/50 cursor-pointer group hover:border-brand/40 transition-all"
                 onclick="setTypeFilter('Laptop')">
                 <p
                     class="text-slate-400 text-[9px] md:text-sm mb-1 uppercase tracking-wider font-bold group-hover:text-brand transition-colors">
                     Laptops</p>
                 <h2 id="stat-laptops" class="text-2xl md:text-3xl font-bold text-brand">--</h2>
             </div>
-            <div class="p-4 md:p-6 rounded-2xl border border-slate-800 bg-slate-800/50 cursor-pointer group hover:border-indigo-500/40 transition-all"
+
+            <!-- Combined Devices Card (Mobile Only) -->
+            <div class="md:hidden p-4 rounded-2xl border border-slate-800 bg-slate-800/50 flex flex-col justify-center">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="cursor-pointer group flex-1" onclick="setTypeFilter('Laptop')">
+                        <p
+                            class="text-slate-400 text-[9px] mb-1 uppercase tracking-wider font-bold group-hover:text-brand">
+                            Laptops</p>
+                        <h2 id="stat-laptops-m" class="text-xl font-bold text-brand">--</h2>
+                    </div>
+                    <div class="w-px h-8 bg-slate-700/50"></div>
+                    <div class="cursor-pointer group flex-1 text-right" onclick="setTypeFilter('Desktop')">
+                        <p
+                            class="text-slate-400 text-[9px] mb-1 uppercase tracking-wider font-bold group-hover:text-indigo-400">
+                            Desktops</p>
+                        <h2 id="stat-desktops-m" class="text-xl font-bold text-indigo-400">--</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desktops (Desktop Only) -->
+            <div class="hidden md:flex flex-col p-6 rounded-2xl border border-slate-800 bg-slate-800/50 cursor-pointer group hover:border-indigo-500/40 transition-all"
                 onclick="setTypeFilter('Desktop')">
                 <p
                     class="text-slate-400 text-[9px] md:text-sm mb-1 uppercase tracking-wider font-bold group-hover:text-indigo-400 transition-colors">
                     Desktops</p>
                 <h2 id="stat-desktops" class="text-2xl md:text-3xl font-bold text-indigo-400">--</h2>
             </div>
+
+            <!-- Performance Semaphore (Mobile Only) -->
             <div
-                class="hidden md:flex p-6 rounded-2xl border border-slate-800 bg-slate-800/50 flex-col items-center justify-center">
+                class="md:hidden p-4 rounded-2xl border border-slate-800 bg-slate-800/50 flex flex-col items-center justify-center">
+                <p class="text-slate-400 text-[9px] mb-2 uppercase tracking-wider font-bold text-center">Performance</p>
+                <div class="flex items-center justify-around w-full">
+                    <div class="flex flex-col items-center cursor-pointer group" onclick="setPerfFilter('G')">
+                        <span class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.3)]"></span>
+                        <span id="stat-perf-g-m" class="text-xs font-bold mt-1 text-slate-100">0</span>
+                    </div>
+                    <div class="flex flex-col items-center cursor-pointer group" onclick="setPerfFilter('Y')">
+                        <span class="w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.3)]"></span>
+                        <span id="stat-perf-y-m" class="text-xs font-bold mt-1 text-slate-100">0</span>
+                    </div>
+                    <div class="flex flex-col items-center cursor-pointer group" onclick="setPerfFilter('R')">
+                        <span class="w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.3)]"></span>
+                        <span id="stat-perf-r-m" class="text-xs font-bold mt-1 text-slate-100">0</span>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="hidden md:flex p-6 rounded-2xl border border-slate-800 bg-slate-800/50 flex flex-col items-center justify-center">
                 <p class="text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-3">Performance</p>
                 <div class="flex flex-col items-center gap-1.5 w-full">
                     <div class="flex items-center justify-center gap-6 mb-1">
@@ -200,7 +316,7 @@
                 </div>
             </div>
             <div
-                class="hidden md:flex p-6 rounded-2xl border border-slate-800 bg-slate-800/50 flex-col items-center justify-center text-center">
+                class="hidden md:flex p-6 rounded-2xl border border-slate-800 bg-slate-800/50 flex flex-col items-center justify-center text-center">
                 <p class="text-slate-400 text-[9px] md:text-sm mb-1 uppercase tracking-wider font-bold">Hora Reporte</p>
                 <h2 id="stat-last" class="text-xs md:text-sm font-medium mt-1 text-slate-300">--</h2>
             </div>
@@ -285,15 +401,15 @@
                 <table class="w-full text-left text-xs md:text-sm">
                     <thead class="bg-slate-800/50 text-slate-400 font-medium">
                         <tr>
-                            <th class="p-3 md:p-4">Service Tag / Equipo</th>
+                            <th class="w-[42%] md:w-auto p-2 md:p-4">Service Tag / Equipo</th>
                             <th class="hidden md:table-cell p-4">Empleado / Correo</th>
-                            <th class="p-3 md:p-4">
+                            <th class="w-[28%] md:w-auto p-2 md:p-4">
                                 <span class="md:hidden">Performance</span>
                                 <span class="hidden md:inline">HW / Performance</span>
                             </th>
                             <th class="hidden md:table-cell p-4">Salud Técnica</th>
-                            <th class="p-3 md:p-4 text-right">
-                                <span class="md:hidden">Disco duro</span>
+                            <th class="w-[30%] md:w-auto p-2 md:p-4 text-right">
+                                <span class="md:hidden">Disco</span>
                                 <span class="hidden md:inline">Actualización</span>
                             </th>
                         </tr>
@@ -311,50 +427,198 @@
             </div>
         </div>
 
-        <!-- Settings / Password Change Modal -->
-        <div id="settingsModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onclick="closeSettingsModal()"></div>
-            <div class="glass w-full max-w-sm rounded-3xl p-8 shadow-2xl relative animate-in zoom-in duration-300">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="bg-brand/20 p-2 rounded-lg text-brand">
-                        <i data-lucide="key-round" class="w-5 h-5"></i>
+
+        <!-- Device Detail Modal (Mod 4) -->
+        <div id="deviceModal" class="hidden fixed inset-0 z-[120] flex items-center justify-center p-2 md:p-4">
+            <div class="absolute inset-0 bg-slate-950/90 backdrop-blur-md" onclick="closeDeviceModal()"></div>
+            <div
+                class="glass w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl relative animate-in zoom-in duration-300">
+                <!-- Modal Header -->
+                <div class="p-6 border-b border-slate-800 flex justify-between items-start bg-slate-900/50">
+                    <div class="flex items-center gap-4">
+                        <div id="deviceIcon" class="p-3 rounded-2xl bg-brand/20 text-brand">
+                            <i id="deviceTypeIcon" data-lucide="monitor" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h3 id="deviceName" class="text-xl font-bold text-white leading-tight">Nombre Equipo</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span id="deviceTag"
+                                    class="text-sm font-mono text-brand font-bold uppercase tracking-wider">TAG-000</span>
+                                <span id="deviceType"
+                                    class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">Laptop</span>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-white">Seguridad</h3>
-                        <p class="text-[10px] text-slate-400 uppercase tracking-widest">Cambiar Contraseña</p>
-                    </div>
+                    <button onclick="closeDeviceModal()"
+                        class="p-2 hover:bg-slate-800 rounded-xl transition-all text-slate-400">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
                 </div>
 
-                <form id="changePasswordForm" class="space-y-4">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Nueva
-                            Contraseña</label>
-                        <input type="password" id="newPassword" required placeholder="Mín. 6 caracteres"
-                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-brand outline-none transition-all">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Confirmar
-                            Contraseña</label>
-                        <input type="password" id="confirmPassword" required placeholder="Repite la contraseña"
-                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-brand outline-none transition-all">
-                    </div>
-                    <div id="passErrorMessage"
-                        class="hidden text-rose-500 text-[10px] font-bold text-center bg-rose-500/10 py-2 rounded-lg">
+                <!-- Modal Body -->
+                <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto">
+                    <!-- User Info Block -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2 text-black mb-2">
+                            <i data-lucide="user" class="w-4 h-4 text-brand"></i>
+                            <span class="text-[10px] font-bold uppercase tracking-widest">Información del Usuario</span>
+                        </div>
+                        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-700/50 shadow-inner group/item">
+                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Nombre
+                                Empleado</div>
+                            <div id="detailEmpName" class="text-sm font-bold text-white tracking-tight">Cargando...
+                            </div>
+                            <div class="mt-4 text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Usuario
+                                / Nómina</div>
+                            <div id="detailUser" class="text-sm text-slate-200 font-mono">---</div>
+                            <div class="mt-4 text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Correo
+                                Electrónico</div>
+                            <div id="detailEmail" class="text-sm text-brand-light italic truncate">---</div>
+                        </div>
                     </div>
 
-                    <div class="flex gap-2 pt-2">
-                        <button type="button" onclick="closeSettingsModal()"
-                            class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl transition-all">
-                            CANCELAR
+                    <!-- hardware Info Block -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2 text-black mb-2">
+                            <i data-lucide="cpu" class="w-4 h-4 text-brand"></i>
+                            <span class="text-[10px] font-bold uppercase tracking-widest">Especificaciones de HW</span>
+                        </div>
+                        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-700/50 shadow-inner">
+                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Procesador
+                            </div>
+                            <div id="detailCPU" class="text-sm font-bold text-white italic">---</div>
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">
+                                        Memoria RAM</div>
+                                    <div id="detailRAM" class="text-sm font-bold text-white">0 GB</div>
+                                </div>
+                                <div>
+                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">
+                                        Modelo PC</div>
+                                    <div id="detailModel"
+                                        class="text-[10px] font-bold text-slate-200 uppercase truncate">---</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- OS & Status Block -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2 text-black mb-2">
+                            <i data-lucide="settings" class="w-4 h-4 text-brand"></i>
+                            <span class="text-[10px] font-bold uppercase tracking-widest">Sistema y Estado</span>
+                        </div>
+                        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-700/50 shadow-inner">
+                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Sistema
+                                Operativo</div>
+                            <div class="flex items-center gap-2">
+                                <div id="detailSO" class="text-sm font-bold text-white">---</div>
+                                <div id="soBadge"
+                                    class="hidden text-[8px] bg-emerald-500 text-white px-2 py-0.5 rounded-md font-bold uppercase shadow-lg shadow-emerald-500/20">
+                                    Al día</div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">
+                                        Salud Batería</div>
+                                    <div id="detailBat" class="text-sm font-bold">100%</div>
+                                </div>
+                                <div>
+                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">
+                                        Última Sincro</div>
+                                    <div id="detailDate" class="text-[10px] font-mono text-slate-300">---</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Disk Info Block -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2 text-black mb-2">
+                            <i data-lucide="hard-drive" class="w-4 h-4 text-brand"></i>
+                            <span class="text-[10px] font-bold uppercase tracking-widest">Almacenamiento</span>
+                        </div>
+                        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-700/50 shadow-inner">
+                            <div class="flex justify-between items-end mb-2">
+                                <div>
+                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">
+                                        Capacidad Total</div>
+                                    <div id="detailDiskTotal" class="text-sm font-bold text-white">0 GB</div>
+                                </div>
+                                <div class="text-right">
+                                    <div id="detailDiskPct" class="text-lg font-black text-brand leading-none">0%</div>
+                                    <div class="text-[8px] text-slate-400 font-bold uppercase tracking-tighter mt-1">
+                                        Utilizado</div>
+                                </div>
+                            </div>
+                            <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+                                <div id="detailDiskBar"
+                                    class="bg-brand h-full transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                                    style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal Footer -->
+                    <div class="p-4 md:p-6 bg-slate-900/50 border-t border-slate-800 flex flex-col md:flex-row gap-3">
+                        <button
+                            onclick="alert('Funcionalidad de Preparaciones próximamente (Service Tag: ' + currentSelectedTag + ')')"
+                            class="w-full md:flex-1 bg-brand hover:bg-emerald-500 text-white font-bold py-3 rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2">
+                            <i data-lucide="wrench" class="w-4 h-4"></i>
+                            <span>PREPARACIONES</span>
                         </button>
-                        <button type="submit" id="updatePassBtn"
-                            class="flex-1 bg-brand hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg">
-                            ACTUALIZAR
+                        <button onclick="closeDeviceModal()"
+                            class="w-full md:px-6 bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 md:py-0 rounded-2xl transition-all">
+                            CERRAR
                         </button>
                     </div>
-                </form>
+                </div>
             </div>
-        </div>
+
+            <!-- Settings / Password Change Modal -->
+            <div id="settingsModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+                <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onclick="closeSettingsModal()"></div>
+                <div class="glass w-full max-w-sm rounded-3xl p-8 shadow-2xl relative animate-in zoom-in duration-300">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="bg-brand/20 p-2 rounded-lg text-brand">
+                            <i data-lucide="key-round" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white">Seguridad</h3>
+                            <p class="text-[10px] text-slate-400 uppercase tracking-widest">Cambiar Contraseña</p>
+                        </div>
+                    </div>
+
+                    <form id="changePasswordForm" class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Nueva
+                                Contraseña</label>
+                            <input type="password" id="newPassword" required placeholder="Mín. 6 caracteres"
+                                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-brand outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Confirmar
+                                Contraseña</label>
+                            <input type="password" id="confirmPassword" required placeholder="Repite la contraseña"
+                                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-brand outline-none transition-all">
+                        </div>
+                        <div id="passErrorMessage"
+                            class="hidden text-rose-500 text-[10px] font-bold text-center bg-rose-500/10 py-2 rounded-lg">
+                        </div>
+
+                        <div class="flex gap-2 pt-2">
+                            <button type="button" onclick="closeSettingsModal()"
+                                class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl transition-all">
+                                CANCELAR
+                            </button>
+                            <button type="submit" id="updatePassBtn"
+                                class="flex-1 bg-brand hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg">
+                                ACTUALIZAR
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
     </main>
 
     <script>
@@ -367,6 +631,7 @@
         let currentPerfFilter = null;
         let currentUpdateFilter = null;
         let currentTypeFilter = null;
+        let currentSelectedTag = null; // Para vincular con el botón de Preparaciones
 
         async function checkAuth() {
             const { data: { session } } = await supabaseClient.auth.getSession();
@@ -540,9 +805,29 @@
         }
 
         function getPerf(item) {
-            if (item.TipoHD === 'HDD' || item.ram_gb <= 4) return { dot: 'bg-rose-500', text: 'text-rose-500', l: 'Bajo' };
-            if (item.ram_gb <= 8) return { dot: 'bg-amber-500', text: 'text-amber-500', l: 'Medio' };
-            return { dot: 'bg-emerald-500', text: 'text-emerald-500', l: 'Excelente' };
+            let reasons = [];
+            const osRaw = item.SistemaOperativo || item.SO || '';
+            const isHDD = (item.TipoHD || '').includes('HDD');
+            const isOSOld = !isOSUpdated(osRaw);
+            const isDiskFull = (item.pct_disco || 0) > 80;
+            const isLowRam = (item.ram_gb || 0) <= 4;
+
+            if (isHDD) reasons.push("Disco Lento (HDD)");
+            if (isOSOld) reasons.push("SO Desactualizado");
+            if (isDiskFull) reasons.push("Espacio Crítico (>80%)");
+            if (isLowRam) reasons.push("Poca RAM (<=4GB)");
+
+            if (reasons.length > 0) {
+                return {
+                    dot: 'bg-rose-500',
+                    text: 'text-rose-500',
+                    l: 'Bajo',
+                    title: `Razones: ${reasons.join(', ')}`
+                };
+            }
+
+            if (item.ram_gb <= 8) return { dot: 'bg-amber-500', text: 'text-amber-500', l: 'Medio', title: 'Equilibrado' };
+            return { dot: 'bg-emerald-500', text: 'text-emerald-500', l: 'Excelente', title: 'Excelente estado' };
         }
 
         function renderData(items) {
@@ -553,14 +838,16 @@
                 const dskCol = item.pct_disco > 80 ? 'text-rose-400' : (item.pct_disco > 60 ? 'text-amber-400' : 'text-emerald-400');
                 const empName = empMap[item.NumeroEmpleado] || 'SIN ASIGNAR';
 
+                const onClickAction = `onclick="showDeviceInfo('${item.ServiceTag}')"`;
+
                 return `
                 <tr class="hover:bg-slate-800/30 transition-colors group">
-                    <td class="p-3 md:p-4">
+                    <td class="p-2 md:p-4">
                         <!-- Desktop View: Service Tag alone -->
-                        <div class="hidden md:block font-bold text-brand text-sm">${item.ServiceTag || 'S/N'}</div>
+                        <div ${onClickAction} class="hidden md:block font-bold text-brand text-sm cursor-pointer hover:underline decoration-brand/50 decoration-2 underline-offset-4 transition-all">${item.ServiceTag || 'S/N'}</div>
                         <!-- Mobile View: Service Tag + Tipo Equipo (White) -->
-                        <div class="md:hidden flex items-center gap-2">
-                            <span class="font-bold text-brand text-sm">${item.ServiceTag || 'S/N'}</span>
+                        <div ${onClickAction} class="md:hidden flex items-center gap-2 cursor-pointer">
+                            <span class="font-bold text-brand text-sm hover:underline decoration-brand/50">${item.ServiceTag || 'S/N'}</span>
                             <span class="text-[10px] text-white font-bold uppercase mt-0.5">${item.TipoEquipo || 'Equipo'}</span>
                         </div>
                         
@@ -575,39 +862,137 @@
                         <div class="font-medium text-slate-200">${item.NumeroEmpleado || '---'}</div>
                         <div class="text-xs text-slate-500 mt-0.5">${item.correo || ''}</div>
                     </td>
-                    <td class="p-3 md:p-4">
+                    <td class="p-2 md:p-4">
                         <div class="text-xs md:text-xs font-bold text-slate-200">${item.cpu || 'CPU'} | ${item.ram_gb || '0'}GB</div>
-                        <div class="text-[10px] md:text-[10px] font-bold ${p.text} uppercase tracking-tighter">Perf: ${p.l}</div>
+                        <div title="${p.title}" 
+                             ontouchstart="startLongPress(event, '${p.title}')" 
+                             ontouchend="cancelLongPress()" 
+                             onmousedown="startLongPress(event, '${p.title}')"
+                             onmouseup="cancelLongPress()"
+                             onmouseleave="cancelLongPress()"
+                             oncontextmenu="event.preventDefault(); return false;"
+                             class="text-[10px] md:text-[10px] font-bold ${p.text} uppercase tracking-tighter cursor-help select-none">Perf: ${p.l}</div>
                     </td>
                     <td class="hidden md:table-cell p-4">
                         <div class="text-[10px] text-slate-500">Bat: <span class="${batCol}">${item.Saludbateria || 100}%</span></div>
-                        <div class="text-[10px] text-slate-500">Disco: <span class="${dskCol}">${item.pct_disco || 0}%</span></div>
+                        <div class="text-[10px] text-slate-500">Disco: <span class="text-slate-200 font-bold">${item.disk_total_gb || 0} GB</span></div>
+                        <div class="text-[10px] text-slate-500 mt-0.5"><span class="${dskCol}">${item.pct_disco || 0}%</span> <span class="${(item.TipoHD || '').includes('HDD') ? 'text-rose-500 font-black' : 'text-white font-bold'}">${item.TipoHD || ''}</span></div>
                     </td>
-                    <td class="p-3 md:p-4 text-right">
-                        <div class="hidden md:block font-mono text-slate-300 text-xs md:text-sm">${formatDate(item.FechaActualizacion)}</div>
+                    <td class="p-2 md:p-4 text-right">
+                        <!-- Desktop View: OS (Color Coded) + Date -->
+                        <div class="hidden md:block">
+                            <div class="font-bold text-[10px] mb-0.5 ${isOSUpdated(item.SistemaOperativo || item.SO) ? 'text-emerald-400' : 'text-rose-400'} uppercase truncate max-w-[140px] ml-auto">
+                                ${cleanOS(item.SistemaOperativo || item.SO)}
+                            </div>
+                            <div class="font-mono text-slate-300 text-[10px] md:text-sm">${formatDate(item.FechaActualizacion)}</div>
+                        </div>
+                        <!-- Mobile View -->
                         <div class="md:hidden flex flex-col items-end mt-1">
                             <div class="text-[11px] font-bold text-slate-200">${item.disk_total_gb || 0} GB</div>
-                            <div class="text-[10px] font-bold ${dskCol} mt-0.5">${item.pct_disco || 0}% Usado</div>
+                            <div class="text-[10px] font-bold ${dskCol} mt-0.5">${item.pct_disco || 0}%</div>
+                            <div class="text-[9px] font-black mt-0.5 ${(item.TipoHD || '').includes('HDD') ? 'text-rose-500' : 'text-white'}">${item.TipoHD || ''}</div>
                         </div>
                     </td>
-                </tr>`;
+                </tr > `;
             }).join('');
             lucide.createIcons();
         }
 
+        function showDeviceInfo(tag) {
+            const item = masterData.find(i => i.ServiceTag === tag);
+            if (!item) return;
+
+            currentSelectedTag = tag;
+            const empName = empMap[item.NumeroEmpleado] || 'SIN ASIGNAR';
+            const batCol = item.Saludbateria < 70 ? 'text-rose-400' : 'text-emerald-400';
+            const dskCol = item.pct_disco > 80 ? 'text-rose-400' : (item.pct_disco > 60 ? 'text-amber-400' : 'text-emerald-400');
+
+            // Header info
+            document.getElementById('deviceName').innerText = item.NombreEquipo || 'Equipo Genérico';
+            document.getElementById('deviceTag').innerText = item.ServiceTag || 'S/N';
+            document.getElementById('deviceType').innerText = item.TipoEquipo || 'Equipo';
+
+            // Icon logic
+            const iconContainer = document.getElementById('deviceIcon');
+            const typeIcon = document.getElementById('deviceTypeIcon');
+            if (item.TipoEquipo === 'Laptop') {
+                typeIcon.setAttribute('data-lucide', 'laptop');
+                iconContainer.className = 'p-3 rounded-2xl bg-indigo-500/20 text-indigo-400';
+            } else {
+                typeIcon.setAttribute('data-lucide', 'monitor');
+                iconContainer.className = 'p-3 rounded-2xl bg-brand/20 text-brand';
+            }
+
+            // User block
+            document.getElementById('detailEmpName').innerText = empName;
+            document.getElementById('detailUser').innerText = item.NumeroEmpleado || item.Usuario || '---';
+            document.getElementById('detailEmail').innerText = item.correo || '---';
+
+            // Hardware block
+            document.getElementById('detailCPU').innerText = item.cpu || '---';
+            document.getElementById('detailRAM').innerText = (item.ram_gb || 0) + ' GB';
+            document.getElementById('detailModel').innerText = item.Modelo || '---';
+
+            // OS & Status
+            const osRaw = item.SistemaOperativo || item.SO || '---';
+            const osVal = cleanOS(osRaw);
+            const isUpdated = isOSUpdated(osRaw);
+            const osEl = document.getElementById('detailSO');
+            osEl.innerText = osVal;
+            osEl.className = `text-sm font-bold ${isUpdated ? 'text-emerald-400' : 'text-rose-400'}`;
+
+            document.getElementById('detailBat').innerText = (item.Saludbateria || 100) + '%';
+            document.getElementById('detailBat').className = `text-sm font-bold ${batCol}`;
+            document.getElementById('detailDate').innerText = formatDate(item.FechaActualizacion);
+
+            // OS Update logic
+            const soBadge = document.getElementById('soBadge');
+            if (isUpdated) {
+                soBadge.classList.remove('hidden');
+            } else {
+                soBadge.classList.add('hidden');
+            }
+
+            // Disk block
+            const hdType = item.TipoHD || '';
+            const hdColor = hdType.includes('HDD') ? 'text-rose-500' : 'text-white';
+            document.getElementById('detailDiskTotal').innerHTML = `${item.disk_total_gb || 0} GB <span class="ml-2 ${hdColor} font-black">${hdType}</span>`;
+            document.getElementById('detailDiskPct').innerText = (item.pct_disco || 0) + '%';
+            document.getElementById('detailDiskBar').style.width = (item.pct_disco || 0) + '%';
+            document.getElementById('detailDiskPct').className = `text-lg font-black ${dskCol} leading-none`;
+
+            document.getElementById('deviceModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeDeviceModal() {
+            document.getElementById('deviceModal').classList.add('hidden');
+        }
+
         function updateStats(data) {
             document.getElementById('stat-total').innerText = data.length;
-            document.getElementById('stat-laptops').innerText = data.filter(i => i.TipoEquipo === 'Laptop').length;
-            document.getElementById('stat-desktops').innerText = data.filter(i => i.TipoEquipo === 'Desktop').length;
 
-            const perfR = data.filter(i => i.TipoHD === 'HDD' || i.ram_gb <= 4).length;
-            const perfY = data.filter(i => i.TipoHD !== 'HDD' && i.ram_gb > 4 && i.ram_gb <= 8).length;
-            const perfG = data.filter(i => i.TipoHD !== 'HDD' && i.ram_gb > 8).length;
+            const perfR = data.filter(i => getPerf(i).l === 'Bajo').length;
+            const perfY = data.filter(i => getPerf(i).l === 'Medio').length;
+            const perfG = data.filter(i => getPerf(i).l === 'Excelente').length;
 
+            // Update Desktop IDs
+            if (document.getElementById('stat-laptops')) {
+                document.getElementById('stat-laptops').innerText = data.filter(i => i.TipoEquipo === 'Laptop').length;
+                document.getElementById('stat-desktops').innerText = data.filter(i => i.TipoEquipo === 'Desktop').length;
+            }
             if (document.getElementById('stat-perf-g')) {
                 document.getElementById('stat-perf-g').innerText = perfG;
                 document.getElementById('stat-perf-y').innerText = perfY;
                 document.getElementById('stat-perf-r').innerText = perfR;
+            }
+            // Update Mobile IDs
+            if (document.getElementById('stat-laptops-m')) {
+                document.getElementById('stat-laptops-m').innerText = data.filter(i => i.TipoEquipo === 'Laptop').length;
+                document.getElementById('stat-desktops-m').innerText = data.filter(i => i.TipoEquipo === 'Desktop').length;
+                document.getElementById('stat-perf-g-m').innerText = perfG;
+                document.getElementById('stat-perf-y-m').innerText = perfY;
+                document.getElementById('stat-perf-r-m').innerText = perfR;
             }
 
             const nowInAZ = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Phoenix' }).format(new Date());
@@ -627,6 +1012,17 @@
                     document.getElementById('stat-last-mobile').innerText = lastTime;
                 }
             }
+        }
+
+        function cleanOS(str) {
+            if (!str) return "---";
+            return str.replace(/Microsoft /g, '').replace(/Windows/g, 'Windows');
+        }
+
+        function isOSUpdated(str) {
+            if (!str) return false;
+            // Heuristic: Windows 11 or Windows 10 versions 22H2/23H2 (Builds 19045+)
+            return str.includes('Windows 11') || str.includes('22H2') || str.includes('23H2') || str.includes('19045') || str.includes('22621') || str.includes('22631');
         }
 
         function formatDate(str) {
@@ -665,7 +1061,7 @@
 
             const filtered = masterData.filter(item => {
                 const empName = empMap[item.NumeroEmpleado] || '';
-                const searchStr = `${item.ServiceTag} ${item.NumeroEmpleado} ${empName} ${item.correo}`.toLowerCase();
+                const searchStr = `${item.ServiceTag} ${item.NumeroEmpleado} ${empName} ${item.correo} `.toLowerCase();
                 const matchesSearch = !searchVal || searchStr.includes(searchVal);
                 const matchesType = !currentTypeFilter || item.TipoEquipo === currentTypeFilter;
                 let matchesDisk = diskVal === 'all' || item.TipoHD === diskVal;
