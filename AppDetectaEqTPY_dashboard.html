@@ -150,59 +150,8 @@
             if (tooltipEl) tooltipEl.classList.add('hidden');
         }
 
-        // Voice Search Logic
-        let recognition;
-        let isListening = false;
-
-        function toggleVoiceSearch() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                alert("La búsqueda por voz no es compatible con este navegador.");
-                return;
-            }
-
-            if (!recognition) {
-                recognition = new SpeechRecognition();
-                recognition.lang = 'es-MX';
-                recognition.continuous = false;
-                recognition.interimResults = false;
-
-                recognition.onstart = () => {
-                    isListening = true;
-                    const btn = document.getElementById('voiceSearchBtn');
-                    btn.classList.add('text-rose-500', 'status-pulse');
-                };
-
-                recognition.onresult = (event) => {
-                    const text = event.results[0][0].transcript;
-                    const searchInput = document.getElementById('searchInput');
-                    searchInput.value = text;
-                    // Trigger the filter
-                    const e = new Event('input', { bubbles: true });
-                    searchInput.dispatchEvent(e);
-                };
-
-                recognition.onerror = (event) => {
-                    console.error("Speech Recognition Error:", event.error);
-                    stopListeningUI();
-                };
-
-                recognition.onend = () => {
-                    stopListeningUI();
-                };
-            }
-
-            if (isListening) {
-                recognition.stop();
-            } else {
-                recognition.start();
-            }
-        }
-
-        function stopListeningUI() {
-            isListening = false;
-            const btn = document.getElementById('voiceSearchBtn');
-            if (btn) btn.classList.remove('text-rose-500', 'status-pulse');
+        function hideMobileTooltip() {
+            if (tooltipEl) tooltipEl.classList.add('hidden');
         }
 
         // Global click listener to hide tooltip when clicking elsewhere
@@ -434,16 +383,11 @@
 
         <!-- Search & Filters -->
         <div class="mb-4 flex flex-col md:flex-row gap-2 md:gap-4">
-            <div class="relative flex-1 group">
+            <div class="relative flex-1">
                 <i data-lucide="search"
                     class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-slate-500"></i>
                 <input type="text" id="searchInput" placeholder="Serie, Empleado, Empresa..."
-                    class="w-full bg-slate-800 border-none rounded-xl py-2 md:py-3 pl-10 pr-12 text-xs md:text-sm focus:ring-2 focus:ring-green-500 transition-all outline-none">
-                <button id="voiceSearchBtn" onclick="toggleVoiceSearch()"
-                    class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-brand transition-all"
-                    title="Buscar por voz">
-                    <i data-lucide="mic" class="w-4 h-4 md:w-5 md:h-5"></i>
-                </button>
+                    class="w-full bg-slate-800 border-none rounded-xl py-2 md:py-3 pl-10 pr-4 text-xs md:text-sm focus:ring-2 focus:ring-green-500 transition-all outline-none">
             </div>
             <div class="flex gap-2 w-full md:w-auto">
                 <select id="filterDisk"
