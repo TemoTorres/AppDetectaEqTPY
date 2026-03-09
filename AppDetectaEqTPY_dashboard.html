@@ -135,8 +135,7 @@
                 tooltipEl.id = 'mobile-tooltip';
                 document.body.appendChild(tooltipEl);
             }
-            tooltipEl.innerHTML = `<div class="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-1">Razón del Performance</div>
-                                   <div class="text-xs text-white leading-relaxed">${text.replace('Razones: ', '')}</div>`;
+            tooltipEl.innerHTML = `<div class="text-xs text-white leading-relaxed font-medium">${text}</div>`;
             tooltipEl.style.left = x + 'px';
             tooltipEl.style.top = y + 'px';
             tooltipEl.classList.remove('hidden');
@@ -841,7 +840,7 @@
                     dot: 'bg-rose-500',
                     text: 'text-rose-500',
                     l: 'Bajo',
-                    title: `Razones: ${reasons.join(', ')}`
+                    title: `${reasons.join(', ')}`
                 };
             }
 
