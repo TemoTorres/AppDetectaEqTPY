@@ -97,29 +97,36 @@
             border-right: 6px solid transparent;
             border-top: 6px solid rgba(15, 23, 42, 0.95);
         }
+
+        .perf-link {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            text-decoration-thickness: 1px;
+            text-decoration-style: dotted;
+        }
     </style>
     <script>
-        // Long Press Logic for Mobile Tooltips
-        let longPressTimer;
         let tooltipEl;
 
-        function startLongPress(e, text) {
+        function toggleMobileTooltip(e, text) {
             if (!text || text === 'Excelente estado' || text === 'Equilibrado') return;
 
-            // Get coordinates for both touch and mouse (for F12 simulator)
+            // Prevent default to avoid side effects
+            if (e.cancelable) e.preventDefault();
+
+            // If already showing the SAME text, hide it (Toggle)
+            if (tooltipEl && !tooltipEl.classList.contains('hidden') && tooltipEl.lastText === text) {
+                hideMobileTooltip();
+                return;
+            }
+
             const x = e.touches ? e.touches[0].clientX : e.clientX;
             const y = e.touches ? e.touches[0].clientY : e.clientY;
 
-            clearTimeout(longPressTimer);
-            longPressTimer = setTimeout(() => {
-                showMobileTooltip(x, y, text);
-                if (navigator.vibrate) navigator.vibrate(50); // Feedback
-            }, 3000); // 3 Seconds
-        }
-
-        function cancelLongPress() {
-            clearTimeout(longPressTimer);
-            hideMobileTooltip();
+            showMobileTooltip(x, y, text);
         }
 
         function showMobileTooltip(x, y, text) {
@@ -133,11 +140,23 @@
             tooltipEl.style.left = x + 'px';
             tooltipEl.style.top = y + 'px';
             tooltipEl.classList.remove('hidden');
+            tooltipEl.lastText = text; // Track what's being shown
+
+            // Auto-hide after 5 seconds to not obstruct the view forever
+            clearTimeout(tooltipEl.timer);
+            tooltipEl.timer = setTimeout(hideMobileTooltip, 5000);
         }
 
         function hideMobileTooltip() {
             if (tooltipEl) tooltipEl.classList.add('hidden');
         }
+
+        // Global click listener to hide tooltip when clicking elsewhere
+        document.addEventListener('touchstart', (e) => {
+            if (tooltipEl && !tooltipEl.contains(e.target) && !e.target.closest('.perf-link')) {
+                hideMobileTooltip();
+            }
+        });
     </script>
 </head>
 
@@ -865,13 +884,9 @@
                     <td class="p-2 md:p-4">
                         <div class="text-xs md:text-xs font-bold text-slate-200">${item.cpu || 'CPU'} | ${item.ram_gb || '0'}GB</div>
                         <div title="${p.title}" 
-                             ontouchstart="startLongPress(event, '${p.title}')" 
-                             ontouchend="cancelLongPress()" 
-                             onmousedown="startLongPress(event, '${p.title}')"
-                             onmouseup="cancelLongPress()"
-                             onmouseleave="cancelLongPress()"
+                             onclick="toggleMobileTooltip(event, '${p.title}')"
                              oncontextmenu="event.preventDefault(); return false;"
-                             class="text-[10px] md:text-[10px] font-bold ${p.text} uppercase tracking-tighter cursor-help select-none">Perf: ${p.l}</div>
+                             class="text-[10px] md:text-[10px] font-bold ${p.text} uppercase tracking-tighter cursor-help select-none md:no-underline perf-link">Perf: ${p.l}</div>
                     </td>
                     <td class="hidden md:table-cell p-4">
                         <div class="text-[10px] text-slate-500">Bat: <span class="${batCol}">${item.Saludbateria || 100}%</span></div>
