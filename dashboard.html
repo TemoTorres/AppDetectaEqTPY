@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Detecta Equipo</title>
-    <link rel="manifest" href="manifest.json">
+    <title>DET-EQ TPY | Dashboard</title>
+    <link rel="manifest" href="AppDetectaEqTPY_manifest.json?v=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Detecta EQ">
-    <link rel="apple-touch-icon" href="https://via.placeholder.com/192/3b82f6/ffffff?text=EQ">
+    <meta name="apple-mobile-web-app-title" content="DET-EQ TPY">
+    <link rel="apple-touch-icon" href="appdetectaeqtpy_icon_192.png?v=1.0">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS -->
@@ -69,85 +69,266 @@
                 opacity: 1;
             }
         }
+
+        /* Long Press Tooltip for Mobile */
+        #mobile-tooltip {
+            position: fixed;
+            z-index: 9999;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(244, 63, 94, 0.5);
+            /* Rose border for alerts */
+            padding: 12px 16px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            backdrop-filter: blur(8px);
+            max-width: 250px;
+            transform: translate(-50%, -100%);
+            margin-top: -20px;
+        }
+
+        #mobile-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid rgba(15, 23, 42, 0.95);
+        }
+        .perf-link {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            text-decoration-thickness: 1px;
+            text-decoration-style: dotted;
+        }
+
+        /* Custom scrollbar for dark dropdowns */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b; 
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
     </style>
+    <script>
+        let tooltipEl;
+
+        function toggleMobileTooltip(e, text) {
+            if (!text || text === 'Excelente estado' || text === 'Equilibrado') return;
+
+            // Prevent default to avoid side effects
+            if (e.cancelable) e.preventDefault();
+
+            // If already showing the SAME text, hide it (Toggle)
+            if (tooltipEl && !tooltipEl.classList.contains('hidden') && tooltipEl.lastText === text) {
+                hideMobileTooltip();
+                return;
+            }
+
+            const x = e.touches ? e.touches[0].clientX : e.clientX;
+            const y = e.touches ? e.touches[0].clientY : e.clientY;
+
+            showMobileTooltip(x, y, text);
+        }
+
+        function showMobileTooltip(x, y, text) {
+            if (!tooltipEl) {
+                tooltipEl = document.createElement('div');
+                tooltipEl.id = 'mobile-tooltip';
+                document.body.appendChild(tooltipEl);
+            }
+            tooltipEl.innerHTML = `<div class="text-xs text-white leading-relaxed font-medium">${text}</div>`;
+            tooltipEl.style.left = x + 'px';
+            tooltipEl.style.top = y + 'px';
+            tooltipEl.classList.remove('hidden');
+            tooltipEl.lastText = text; // Track what's being shown
+
+            // Auto-hide after 5 seconds to not obstruct the view forever
+            clearTimeout(tooltipEl.timer);
+            tooltipEl.timer = setTimeout(hideMobileTooltip, 5000);
+        }
+
+        function hideMobileTooltip() {
+            if (tooltipEl) tooltipEl.classList.add('hidden');
+        }
+
+        function hideMobileTooltip() {
+            if (tooltipEl) tooltipEl.classList.add('hidden');
+        }
+
+        // Global click listener to hide tooltip when clicking elsewhere
+        document.addEventListener('touchstart', (e) => {
+            if (tooltipEl && !tooltipEl.contains(e.target) && !e.target.closest('.perf-link')) {
+                hideMobileTooltip();
+            }
+        });
+    </script>
 </head>
 
 <body class="bg-slate-900 text-slate-100 min-h-screen">
 
     <!-- Header -->
-    <header
-        class="flex items-center justify-between mb-2 px-6 py-3 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-50 border-b border-white/5">
-        <div class="flex items-center gap-6">
-            <!-- Logotipo 75 Años solicitado (Transparencia mediante mezcla de pantalla) -->
-            <div class="w-20 h-20 md:w-24 md:h-24 flex items-center justify-center">
-                <img src="logo_tepeyac_75.jpg" alt="Tepeyac 75 Años" class="max-w-full max-h-full object-contain"
-                    style="filter: invert(1) hue-rotate(180deg); mix-blend-mode: screen;"
-                    onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-emerald-500/10 rounded-xl flex items-center justify-center text-[#A5CF45] font-black text-3xl text-center leading-tight\'>75<br><span class=\'text-[10px] uppercase\'>Años</span></div>'">
+    <header class="mb-2 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-50 border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-2 md:px-8 py-3 flex items-center justify-between w-full">
+            <div class="flex items-center gap-2 md:gap-6 select-none">
+                <!-- Logotipo 75 Años -->
+                <div class="w-12 h-12 md:w-24 md:h-24 flex items-center justify-center flex-shrink-0">
+                    <img src="logo_tepeyac_75.jpg" alt="Tepeyac 75 Años" class="max-w-full max-h-full object-contain"
+                        style="filter: invert(1) hue-rotate(180deg); mix-blend-mode: screen;"
+                        onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-emerald-500/10 rounded-xl flex items-center justify-center text-[#A5CF45] font-black text-xl md:text-3xl text-center leading-tight\'>75<br><span class=\'text-[8px] md:text-[10px] uppercase\'>Años</span></div>'">
+                </div>
+                <div class="flex flex-col justify-center overflow-hidden">
+                    <h1 class="text-xl md:text-3xl font-black tracking-tighter uppercase leading-none"
+                        style="color: #A5CF45;">
+                        APPDETECTAEQTPY</h1>
+                    <div class="flex flex-col mt-1.5">
+                        <span class="text-[10px] md:text-sm font-bold uppercase tracking-[0.2em] leading-none"
+                            style="color: #A5CF45; opacity: 0.9;">
+                            Fertilizantes Tepeyac
+                        </span>
+                        <div class="flex flex-col md:flex-row md:items-center gap-1.5 mt-1.5">
+                            <span class="text-[8px] md:text-[9px] font-bold uppercase tracking-widest leading-none"
+                                style="color: #389B42;">
+                                Ing. Cuauhtémoc Torres
+                            </span>
+                            <span class="hidden md:block w-1 h-1 bg-emerald-500/20 rounded-full"></span>
+                            <span
+                                class="text-[8px] md:text-[9px] font-black uppercase tracking-widest leading-none text-[#389B42]">
+                                Versión 1.0
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="flex flex-col justify-center">
-                <h1 class="text-lg md:text-2xl font-black tracking-tighter uppercase leading-none mb-0.5"
-                    style="color: #A5CF45;">
-                    APPDETECTAEQTPY</h1>
-                <div class="flex flex-col">
-                    <span class="text-sm md:text-lg font-black leading-tight mt-1" style="color: #A5CF45;">
-                        Fertilizantes Tepeyac
+            <div class="flex flex-col items-end gap-1.5 min-w-0">
+                <div id="stat-last-mobile"
+                    class="text-[9px] md:hidden font-bold text-slate-400 uppercase tracking-wider leading-none bg-slate-800/40 px-2 py-1 rounded-lg border border-white/5 whitespace-nowrap">
+                    --</div>
+                <div class="flex items-center gap-1 md:gap-4">
+                    <span id="connection-status" class="hidden md:flex items-center gap-2 text-xs text-emerald-400">
+                        <span class="w-2 h-2 bg-emerald-400 rounded-full status-pulse"></span>
+                        Sincronizado
                     </span>
-                    <span class="text-[8px] font-bold uppercase tracking-widest leading-tight -mt-0.5"
-                        style="color: #389B42;">
-                        Ing. Cuauhtémoc Torres S/Antigravity
-                    </span>
+                    <button onclick="fetchData()" class="p-2 hover:bg-slate-800 rounded-full transition-colors"
+                        title="Refrescar">
+                        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="openSettingsModal()" class="p-2 hover:bg-slate-800 rounded-full transition-colors"
+                        title="Configuración de Cuenta">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                    </button>
+                    <button id="adminBtn" onclick="toggleAdminPanel()"
+                        class="hidden p-2 hover:bg-indigo-500/20 text-indigo-400 rounded-full transition-colors"
+                        title="Administración">
+                        <i data-lucide="shield-check" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="handleLogout()"
+                        class="p-2 hover:bg-rose-500/20 text-rose-400 rounded-full transition-colors"
+                        title="Cerrar Sesión">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
                 </div>
             </div>
         </div>
-        <div class="flex items-center gap-4">
-            <span id="connection-status" class="flex items-center gap-2 text-xs text-emerald-400">
-                <span class="w-2 h-2 bg-emerald-400 rounded-full status-pulse"></span>
-                Sincronizado
-            </span>
-            <button onclick="fetchData()" class="p-2 hover:bg-slate-800 rounded-full transition-colors"
-                title="Refrescar">
-                <i data-lucide="refresh-cw" class="w-5 h-5"></i>
-            </button>
-            <button id="adminBtn" onclick="toggleAdminPanel()"
-                class="hidden p-2 hover:bg-indigo-500/20 text-indigo-400 rounded-full transition-colors"
-                title="Administración">
-                <i data-lucide="shield-check" class="w-5 h-5"></i>
-            </button>
-            <button onclick="handleLogout()"
-                class="p-2 hover:bg-rose-500/20 text-rose-400 rounded-full transition-colors" title="Cerrar Sesión">
-                <i data-lucide="log-out" class="w-5 h-5"></i>
-            </button>
-        </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-2 md:px-8 md:py-4">
+    <main class="max-w-7xl mx-auto px-2 py-2 md:px-8 md:py-4">
 
         <!-- Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-4">
-            <div class="p-6 rounded-2xl border border-slate-800 bg-slate-800/50">
-                <p class="text-slate-400 text-sm mb-1">Total Equipos</p>
-                <h2 id="stat-total" class="text-3xl font-bold">--</h2>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-3 md:gap-6 mb-4">
+            <div class="p-4 md:p-6 rounded-2xl border border-slate-800 bg-slate-800/50">
+                <p class="text-slate-400 text-[9px] md:text-sm mb-1 uppercase tracking-wider font-bold">Total Equipos
+                </p>
+                <h2 id="stat-total" class="text-2xl md:text-3xl font-bold">--</h2>
             </div>
-            <div class="p-6 rounded-2xl border border-slate-800 bg-slate-800/50 border-emerald-500/30">
-                <div class="flex flex-col h-full justify-between gap-2">
-                    <div class="flex items-center justify-between cursor-pointer group"
+            <div class="p-4 md:p-6 rounded-2xl border border-slate-800 bg-slate-800/50 border-emerald-500/30">
+                <div class="flex flex-col h-full justify-between gap-1">
+                    <div class="flex items-center justify-between cursor-pointer group hover:bg-emerald-500/5 -mx-2 px-2 py-1 rounded-lg transition-colors"
                         onclick="setUpdateFilter('today')">
                         <span
-                            class="text-emerald-400 text-[10px] uppercase font-bold tracking-wider group-hover:translate-x-0.5 transition-transform">En
-                            Línea <span class="opacity-60">Hoy</span></span>
-                        <span id="stat-today" class="text-2xl font-bold text-emerald-400">--</span>
+                            class="text-emerald-400 text-[8px] md:text-[10px] uppercase font-bold tracking-wider group-hover:translate-x-0.5 transition-transform">En
+                            Línea <span class="opacity-60 md:hidden">Hoy</span></span>
+                        <span id="stat-today" class="text-lg md:text-2xl font-bold text-emerald-400">--</span>
                     </div>
-                    <div class="pt-2 border-t border-slate-700/50 flex items-center justify-between cursor-pointer group"
+                    <div class="pt-1 border-t border-slate-700/50 flex items-center justify-between cursor-pointer group hover:bg-rose-500/5 -mx-2 px-2 py-1 rounded-lg transition-colors"
                         onclick="setUpdateFilter('offline')">
                         <span
-                            class="text-rose-400 text-[10px] uppercase font-bold tracking-wider group-hover:translate-x-0.5 transition-transform">Fuera
-                            de Línea</span>
-                        <span id="stat-offline" class="text-xl font-bold text-rose-400">--</span>
+                            class="text-rose-400 text-[8px] md:text-[10px] uppercase font-bold tracking-wider group-hover:translate-x-0.5 transition-transform">Offline</span>
+                        <span id="stat-offline" class="text-lg md:text-xl font-bold text-rose-400">--</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Laptops (Desktop Only) -->
+            <div class="hidden md:flex flex-col p-6 rounded-2xl border border-slate-800 bg-slate-800/50 cursor-pointer group hover:border-brand/40 transition-all"
+                onclick="setTypeFilter('Laptop')">
+                <p
+                    class="text-slate-400 text-[9px] md:text-sm mb-1 uppercase tracking-wider font-bold group-hover:text-brand transition-colors">
+                    Laptops</p>
+                <h2 id="stat-laptops" class="text-2xl md:text-3xl font-bold text-brand">--</h2>
+            </div>
+
+            <!-- Combined Devices Card (Mobile Only) -->
+            <div class="md:hidden p-4 rounded-2xl border border-slate-800 bg-slate-800/50 flex flex-col justify-center">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="cursor-pointer group flex-1" onclick="setTypeFilter('Laptop')">
+                        <p
+                            class="text-slate-400 text-[9px] mb-1 uppercase tracking-wider font-bold group-hover:text-brand">
+                            Laptops</p>
+                        <h2 id="stat-laptops-m" class="text-xl font-bold text-brand">--</h2>
+                    </div>
+                    <div class="w-px h-8 bg-slate-700/50"></div>
+                    <div class="cursor-pointer group flex-1 text-right" onclick="setTypeFilter('Desktop')">
+                        <p
+                            class="text-slate-400 text-[9px] mb-1 uppercase tracking-wider font-bold group-hover:text-indigo-400">
+                            Desktops</p>
+                        <h2 id="stat-desktops-m" class="text-xl font-bold text-indigo-400">--</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desktops (Desktop Only) -->
+            <div class="hidden md:flex flex-col p-6 rounded-2xl border border-slate-800 bg-slate-800/50 cursor-pointer group hover:border-indigo-500/40 transition-all"
+                onclick="setTypeFilter('Desktop')">
+                <p
+                    class="text-slate-400 text-[9px] md:text-sm mb-1 uppercase tracking-wider font-bold group-hover:text-indigo-400 transition-colors">
+                    Desktops</p>
+                <h2 id="stat-desktops" class="text-2xl md:text-3xl font-bold text-indigo-400">--</h2>
+            </div>
+
+            <!-- Performance Semaphore (Mobile Only) -->
+            <div
+                class="md:hidden p-4 rounded-2xl border border-slate-800 bg-slate-800/50 flex flex-col items-center justify-center">
+                <p class="text-slate-400 text-[9px] mb-2 uppercase tracking-wider font-bold text-center">Performance</p>
+                <div class="flex items-center justify-around w-full">
+                    <div class="flex flex-col items-center cursor-pointer group" onclick="setPerfFilter('G')">
+                        <span class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.3)]"></span>
+                        <span id="stat-perf-g-m" class="text-xs font-bold mt-1 text-slate-100">0</span>
+                    </div>
+                    <div class="flex flex-col items-center cursor-pointer group" onclick="setPerfFilter('Y')">
+                        <span class="w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.3)]"></span>
+                        <span id="stat-perf-y-m" class="text-xs font-bold mt-1 text-slate-100">0</span>
+                    </div>
+                    <div class="flex flex-col items-center cursor-pointer group" onclick="setPerfFilter('R')">
+                        <span class="w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.3)]"></span>
+                        <span id="stat-perf-r-m" class="text-xs font-bold mt-1 text-slate-100">0</span>
                     </div>
                 </div>
             </div>
             <div
-                class="p-6 rounded-2xl border border-slate-800 bg-slate-800/50 flex flex-col items-center justify-center">
+                class="hidden md:flex p-6 rounded-2xl border border-slate-800 bg-slate-800/50 flex flex-col items-center justify-center">
                 <p class="text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-3">Performance</p>
                 <div class="flex flex-col items-center gap-1.5 w-full">
                     <div class="flex items-center justify-center gap-6 mb-1">
@@ -171,48 +352,42 @@
                     </div>
                 </div>
             </div>
-            <div class="p-6 rounded-2xl border border-slate-800 bg-slate-800/50">
-                <p class="text-slate-400 text-sm mb-1">Laptops</p>
-                <h2 id="stat-laptops" class="text-3xl font-bold text-brand">--</h2>
-            </div>
-            <div class="p-6 rounded-2xl border border-slate-800 bg-slate-800/50">
-                <p class="text-slate-400 text-sm mb-1">Desktops</p>
-                <h2 id="stat-desktops" class="text-3xl font-bold text-indigo-400">--</h2>
-            </div>
-            <div class="p-6 rounded-2xl border border-slate-800 bg-slate-800/50">
-                <p class="text-slate-400 text-sm mb-1">Último Reporte</p>
-                <h2 id="stat-last" class="text-xl font-medium mt-1">--</h2>
+            <div
+                class="hidden md:flex p-6 rounded-2xl border border-slate-800 bg-slate-800/50 flex flex-col items-center justify-center text-center">
+                <p class="text-slate-400 text-[9px] md:text-sm mb-1 uppercase tracking-wider font-bold">Hora Reporte</p>
+                <h2 id="stat-last" class="text-xs md:text-sm font-medium mt-1 text-slate-300">--</h2>
             </div>
         </div>
 
-        <!-- Admin Panel -->
+        <!-- Admin Panel (Only for Master Admin) -->
         <div id="adminPanel" class="hidden animate-in fade-in slide-in-from-top-4 duration-500 mb-6">
-            <div class="p-6 rounded-3xl border border-indigo-500/30 bg-indigo-500/5 backdrop-blur-xl">
+            <div class="glass rounded-2xl p-6 border-indigo-500/30">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="bg-indigo-500/20 p-2 rounded-lg text-indigo-400">
                         <i data-lucide="users" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <h3 class="text-lg font-bold text-white">Gestión de Usuarios (Admin)</h3>
-                        <p class="text-[10px] text-slate-500 uppercase tracking-widest">Panel exclusivo para
+                        <h3 class="text-lg font-bold text-white">Gestión de Usuarios</h3>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-widest">Master Admin:
                             ctorres@gtepeyac.com</p>
                     </div>
                 </div>
+
                 <form id="createUserForm" class="flex flex-col md:flex-row gap-4 items-end">
                     <div class="flex-1 w-full">
                         <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Correo
                             Electrónico</label>
                         <input type="email" id="newEmail" required placeholder="ejemplo@gtepeyac.com"
-                            class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                            class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
                     </div>
                     <div class="flex-1 w-full">
                         <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Contraseña
                             Temporal</label>
                         <input type="password" id="newPass" required placeholder="Mín. 6 caracteres"
-                            class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                            class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
                     </div>
                     <button type="submit" id="createBtn"
-                        class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-8 py-3 rounded-xl transition-all shadow-lg flex items-center gap-2">
+                        class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-8 py-2.5 rounded-xl transition-all shadow-lg flex items-center gap-2">
                         <span>DAR DE ALTA</span>
                         <i data-lucide="user-plus" class="w-4 h-4"></i>
                     </button>
@@ -221,50 +396,99 @@
             </div>
         </div>
 
-        <!-- Search & Filters -->
-        <div class="mb-4 flex flex-col md:flex-row gap-4">
-            <div class="relative flex-1">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500"></i>
-                <input type="text" id="searchInput" placeholder="Serie, Empleado, Empresa, División o Sucursal..."
-                    class="w-full bg-slate-800 border-none rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-green-500 transition-all outline-none">
+        <!-- Advanced Filters -->
+        <div id="filterWrapper" class="scroll-mt-28 mb-4 bg-slate-800/40 border border-slate-700/50 rounded-2xl py-1 px-4 shadow-lg animate-in zoom-in duration-500 transition-all">
+            <div class="flex justify-between items-center cursor-pointer group select-none" onclick="toggleFilters()" title="Ocultar/Mostrar Filtros">
+                <h3 class="text-xs font-black text-slate-300 uppercase tracking-widest flex items-center gap-2 transition-colors">
+                    <div class="p-1.5 bg-brand/20 rounded-lg group-hover:bg-brand/30 transition-colors flex items-center justify-center">
+                        <i data-lucide="list-filter" class="w-4 h-4 text-brand"></i>
+                    </div>
+                    Búsqueda Avanzada
+                </h3>
+                <div class="p-1 rounded-lg hover:bg-slate-700/50 transition-colors">
+                    <i data-lucide="chevron-up" id="filterChevron" class="w-4 h-4 text-slate-400 rotate-180 transition-transform duration-300"></i>
+                </div>
             </div>
-            <select id="filterType"
-                class="bg-slate-800 rounded-xl px-4 py-3 text-sm border-none outline-none focus:ring-2 focus:ring-green-500 cursor-pointer">
-                <option value="all">Tipo: Todos</option>
-                <option value="Laptop">Solo Laptops</option>
-                <option value="Desktop">Solo Desktops</option>
-            </select>
-            <select id="filterDisk"
-                class="bg-slate-800 rounded-xl px-4 py-3 text-sm border-none outline-none focus:ring-2 focus:ring-green-500 cursor-pointer">
-                <option value="all">Disco: Todos</option>
-                <option value="SSD">Estado Sólido (SSD)</option>
-                <option value="HDD">Disco Duro (HDD)</option>
-                <option value="Unspecified">Otros/Desconocido</option>
-            </select>
+            
+            <div id="filterContainer" class="transition-all duration-300 overflow-hidden max-h-0 opacity-0">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <!-- Empresa -->
+                <div class="flex flex-col relative group">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Empresa</label>
+                    <input type="text" id="fEmpresa" autocomplete="off" placeholder="Todas..." class="filter-input bg-slate-900 border border-slate-700/50 hover:border-brand/50 rounded-xl px-3 py-2.5 text-xs text-white focus:ring-1 focus:ring-brand focus:border-brand outline-none w-full transition-all placeholder-slate-600">
+                    <div id="dd-fEmpresa" class="hidden absolute top-[calc(100%+4px)] left-0 w-full max-h-48 overflow-y-auto bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl z-[60] py-1 custom-scrollbar"></div>
+                </div>
+                <!-- División -->
+                <div class="flex flex-col relative group">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">División</label>
+                    <input type="text" id="fDivision" autocomplete="off" placeholder="Todas..." class="filter-input bg-slate-900 border border-slate-700/50 hover:border-brand/50 rounded-xl px-3 py-2.5 text-xs text-white focus:ring-1 focus:ring-brand focus:border-brand outline-none w-full transition-all placeholder-slate-600">
+                    <div id="dd-fDivision" class="hidden absolute top-[calc(100%+4px)] left-0 w-full max-h-48 overflow-y-auto bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl z-[60] py-1 custom-scrollbar"></div>
+                </div>
+                <!-- Sucursal -->
+                <div class="flex flex-col relative group">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Sucursal</label>
+                    <input type="text" id="fSucursal" autocomplete="off" placeholder="Todas..." class="filter-input bg-slate-900 border border-slate-700/50 hover:border-brand/50 rounded-xl px-3 py-2.5 text-xs text-white focus:ring-1 focus:ring-brand focus:border-brand outline-none w-full transition-all placeholder-slate-600">
+                    <div id="dd-fSucursal" class="hidden absolute top-[calc(100%+4px)] left-0 w-full max-h-48 overflow-y-auto bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl z-[60] py-1 custom-scrollbar"></div>
+                </div>
+                <!-- Area -->
+                <div class="flex flex-col relative group">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Área</label>
+                    <input type="text" id="fArea" autocomplete="off" placeholder="Todas..." class="filter-input bg-slate-900 border border-slate-700/50 hover:border-brand/50 rounded-xl px-3 py-2.5 text-xs text-white focus:ring-1 focus:ring-brand focus:border-brand outline-none w-full transition-all placeholder-slate-600">
+                    <div id="dd-fArea" class="hidden absolute top-[calc(100%+4px)] left-0 w-full max-h-48 overflow-y-auto bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl z-[60] py-1 custom-scrollbar"></div>
+                </div>
+                <!-- No. Empleado -->
+                <div class="flex flex-col relative group">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">No. Empleado</label>
+                    <input type="text" id="fNoEmpleado" autocomplete="off" placeholder="Todos..." class="filter-input bg-slate-900 border border-slate-700/50 hover:border-brand/50 rounded-xl px-3 py-2.5 text-xs text-white focus:ring-1 focus:ring-brand focus:border-brand outline-none w-full transition-all placeholder-slate-600">
+                    <div id="dd-fNoEmpleado" class="hidden absolute top-[calc(100%+4px)] left-0 w-full max-h-48 overflow-y-auto bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl z-[60] py-1 custom-scrollbar"></div>
+                </div>
+                <!-- ServiceTag -->
+                <div class="flex flex-col relative group">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">ServiceTag / ST</label>
+                    <input type="text" id="fServiceTag" autocomplete="off" placeholder="Todos..." class="filter-input bg-slate-900 border border-slate-700/50 hover:border-brand/50 rounded-xl px-3 py-2.5 text-xs text-white focus:ring-1 focus:ring-brand focus:border-brand outline-none w-full transition-all placeholder-slate-600">
+                    <div id="dd-fServiceTag" class="hidden absolute top-[calc(100%+4px)] left-0 w-full max-h-48 overflow-y-auto bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl z-[60] py-1 custom-scrollbar"></div>
+                </div>
+                <!-- Correo -->
+                <div class="flex flex-col relative group">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Correo</label>
+                    <input type="email" id="fCorreo" autocomplete="off" placeholder="Todos..." class="filter-input bg-slate-900 border border-slate-700/50 hover:border-brand/50 rounded-xl px-3 py-2.5 text-xs text-white focus:ring-1 focus:ring-brand focus:border-brand outline-none w-full transition-all placeholder-slate-600">
+                    <div id="dd-fCorreo" class="hidden absolute top-[calc(100%+4px)] left-0 w-full max-h-48 overflow-y-auto bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl z-[60] py-1 custom-scrollbar"></div>
+                </div>
+                <!-- Nombre -->
+                <div class="flex flex-col relative group">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Nombre</label>
+                    <input type="text" id="fNombre" autocomplete="off" placeholder="Todos..." class="filter-input bg-slate-900 border border-slate-700/50 hover:border-brand/50 rounded-xl px-3 py-2.5 text-xs text-white focus:ring-1 focus:ring-brand focus:border-brand outline-none w-full transition-all placeholder-slate-600">
+                    <div id="dd-fNombre" class="hidden absolute top-[calc(100%+4px)] left-0 w-full max-h-48 overflow-y-auto bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl z-[60] py-1 custom-scrollbar"></div>
+                </div>
+            </div>
+            <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-700/30">
+                <select id="filterDisk" class="bg-slate-900 border border-slate-700/50 rounded-xl px-3 py-2 text-xs text-white outline-none focus:ring-1 focus:ring-brand cursor-pointer">
+                    <option value="all">Disco: Todos</option>
+                    <option value="SSD">Solo SSD</option>
+                    <option value="HDD">Solo HDD</option>
+                </select>
+                <button onclick="clearFilters()" class="bg-slate-900 hover:bg-rose-500/20 text-[10px] text-rose-400 font-black tracking-widest px-4 py-2 rounded-xl transition-all border border-slate-700/50 hover:border-rose-500/30 flex items-center gap-1.5 shadow-sm">
+                    <i data-lucide="filter-x" class="w-4 h-4"></i>
+                    LIMPIAR FILTROS
+                </button>
+            </div>
+            </div>
         </div>
 
         <!-- Filter Indicator Banner -->
-        <div id="filterIndicator" class="mb-6 hidden animate-in fade-in slide-in-from-top-2 duration-300">
+        <div id="filterIndicator" class="mb-4 hidden">
             <div
-                class="bg-slate-800/80 border border-slate-700/50 rounded-xl px-4 py-3 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="bg-green-500/10 p-1.5 rounded-lg text-green-500">
-                        <i data-lucide="filter" class="w-4 h-4"></i>
-                    </div>
-                    <p class="text-sm text-slate-300">
-                        <span class="text-slate-500">Filtrando por:</span>
+                class="bg-slate-800/80 border border-slate-700/50 rounded-xl px-4 py-2 flex items-center justify-between">
+                <div class="flex items-center gap-2 overflow-hidden">
+                    <i data-lucide="filter" class="w-3 h-3 text-green-500 flex-shrink-0"></i>
+                    <p class="text-[10px] md:text-sm text-slate-300 truncate">
                         <span id="filterText" class="font-medium text-slate-100">---</span>
                     </p>
-                    <span class="mx-2 w-1 h-1 rounded-full bg-slate-700"></span>
-                    <p class="text-sm">
-                        <span id="filterCount" class="font-bold text-brand">0</span>
-                        <span class="text-slate-500 lowercase">equipos encontrados</span>
-                    </p>
+                    <span id="filterCount" class="font-bold text-brand ml-2 text-xs md:text-sm">0</span>
                 </div>
                 <button onclick="clearFilters()"
-                    class="text-xs font-bold text-slate-400 hover:text-rose-400 flex items-center gap-1.5 transition-colors group">
-                    <i data-lucide="x-circle" class="w-4 h-4 group-hover:rotate-90 transition-transform"></i>
-                    LIMPIAR FILTROS
+                    class="text-[9px] md:text-xs font-bold text-rose-400 ml-2 whitespace-nowrap">
+                    X LIMPIAR
                 </button>
             </div>
         </div>
@@ -272,28 +496,227 @@
         <!-- Data Table -->
         <div class="rounded-2xl border border-slate-800 bg-slate-900/50 overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
+                <table class="w-full text-left text-xs md:text-sm">
                     <thead class="bg-slate-800/50 text-slate-400 font-medium">
                         <tr>
-                            <th class="p-4">Service Tag / Equipo</th>
-                            <th class="p-4">Empleado / Correo</th>
-                            <th class="p-4">HW (Performance)</th>
-                            <th class="p-4">Salud Técnica</th>
-                            <th class="p-4">Ubicación / IP</th>
-                            <th class="p-4 text-right">Actualización</th>
+                            <th class="w-[42%] md:w-auto p-2 md:p-4">Service Tag / Equipo</th>
+                            <th class="hidden md:table-cell p-4">Empleado / Correo</th>
+                            <th class="w-[28%] md:w-auto p-2 md:p-4">
+                                <span class="md:hidden">Performance</span>
+                                <span class="hidden md:inline">HW / Performance</span>
+                            </th>
+                            <th class="hidden md:table-cell p-4">Salud Técnica</th>
+                            <th class="w-[30%] md:w-auto p-2 md:p-4 text-right">
+                                <span class="md:hidden">Disco</span>
+                                <span class="hidden md:inline">Actualización</span>
+                            </th>
                         </tr>
                     </thead>
-                    <tbody id="tableBody" class="divide-y divide-slate-800">
+                    <tbody id="tableBody" class="divide-y divide-slate-800 text-xs md:text-sm">
                         <!-- Data will be injected here -->
                     </tbody>
                 </table>
             </div>
-            <div id="loading" class="p-12 text-center text-slate-500">
-                <div class="inline-block animate-spin mb-4 text-brand"><i data-lucide="loader-2" class="w-8 h-8"></i>
+            <div id="loading" class="p-8 md:p-12 text-center text-slate-500">
+                <div class="inline-block animate-spin mb-4 text-brand"><i data-lucide="loader-2"
+                        class="w-6 h-6 md:w-8 md:h-8"></i>
                 </div>
-                <p>Cargando inventario de Tepeyac...</p>
+                <p class="text-xs md:text-sm">Cargando inventario...</p>
             </div>
         </div>
+
+
+        <!-- Device Detail Modal (Mod 4) -->
+        <div id="deviceModal" class="hidden fixed inset-0 z-[120] flex items-center justify-center p-2 md:p-4">
+            <div class="absolute inset-0 bg-slate-950/90 backdrop-blur-md" onclick="closeDeviceModal()"></div>
+            <div
+                class="glass w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl relative animate-in zoom-in duration-300">
+                <!-- Modal Header -->
+                <div class="p-6 border-b border-slate-800 flex justify-between items-start bg-slate-900/50">
+                    <div class="flex items-center gap-4">
+                        <div id="deviceIcon" class="p-3 rounded-2xl bg-brand/20 text-brand">
+                            <i id="deviceTypeIcon" data-lucide="monitor" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h3 id="deviceName" class="text-xl font-bold text-white leading-tight">Nombre Equipo</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span id="deviceTag"
+                                    class="text-sm font-mono text-brand font-bold uppercase tracking-wider">TAG-000</span>
+                                <span id="deviceType"
+                                    class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">Laptop</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="closeDeviceModal()"
+                        class="p-2 hover:bg-slate-800 rounded-xl transition-all text-slate-400">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto">
+                    <!-- User Info Block -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2 text-black mb-2">
+                            <i data-lucide="user" class="w-4 h-4 text-brand"></i>
+                            <span class="text-[10px] font-bold uppercase tracking-widest">Información del Usuario</span>
+                        </div>
+                        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-700/50 shadow-inner group/item">
+                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Nombre
+                                Empleado</div>
+                            <div id="detailEmpName" class="text-sm font-bold text-white tracking-tight">Cargando...
+                            </div>
+                            <div class="mt-4 text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Usuario
+                                / Nómina</div>
+                            <div id="detailUser" class="text-sm text-slate-200 font-mono">---</div>
+                            <div class="mt-4 text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Correo
+                                Electrónico</div>
+                            <div id="detailEmail" class="text-sm text-brand-light italic truncate">---</div>
+                        </div>
+                    </div>
+
+                    <!-- hardware Info Block -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2 text-black mb-2">
+                            <i data-lucide="cpu" class="w-4 h-4 text-brand"></i>
+                            <span class="text-[10px] font-bold uppercase tracking-widest">Especificaciones de HW</span>
+                        </div>
+                        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-700/50 shadow-inner">
+                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Procesador
+                            </div>
+                            <div id="detailCPU" class="text-sm font-bold text-white italic">---</div>
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">
+                                        Memoria RAM</div>
+                                    <div id="detailRAM" class="text-sm font-bold text-white">0 GB</div>
+                                </div>
+                                <div>
+                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">
+                                        Modelo PC</div>
+                                    <div id="detailModel"
+                                        class="text-[10px] font-bold text-slate-200 uppercase truncate">---</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- OS & Status Block -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2 text-black mb-2">
+                            <i data-lucide="settings" class="w-4 h-4 text-brand"></i>
+                            <span class="text-[10px] font-bold uppercase tracking-widest">Sistema y Estado</span>
+                        </div>
+                        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-700/50 shadow-inner">
+                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Sistema
+                                Operativo</div>
+                            <div class="flex items-center gap-2">
+                                <div id="detailSO" class="text-sm font-bold text-white">---</div>
+                                <div id="soBadge"
+                                    class="hidden text-[8px] bg-emerald-500 text-white px-2 py-0.5 rounded-md font-bold uppercase shadow-lg shadow-emerald-500/20">
+                                    Al día</div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">
+                                        Salud Batería</div>
+                                    <div id="detailBat" class="text-sm font-bold">100%</div>
+                                </div>
+                                <div>
+                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">
+                                        Última Sincro</div>
+                                    <div id="detailDate" class="text-[10px] font-mono text-slate-300">---</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Disk Info Block -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2 text-black mb-2">
+                            <i data-lucide="hard-drive" class="w-4 h-4 text-brand"></i>
+                            <span class="text-[10px] font-bold uppercase tracking-widest">Almacenamiento</span>
+                        </div>
+                        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-700/50 shadow-inner">
+                            <div class="flex justify-between items-end mb-2">
+                                <div>
+                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">
+                                        Capacidad Total</div>
+                                    <div id="detailDiskTotal" class="text-sm font-bold text-white">0 GB</div>
+                                </div>
+                                <div class="text-right">
+                                    <div id="detailDiskPct" class="text-lg font-black text-brand leading-none">0%</div>
+                                    <div class="text-[8px] text-slate-400 font-bold uppercase tracking-tighter mt-1">
+                                        Utilizado</div>
+                                </div>
+                            </div>
+                            <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+                                <div id="detailDiskBar"
+                                    class="bg-brand h-full transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                                    style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal Footer -->
+                    <div class="p-4 md:p-6 bg-slate-900/50 border-t border-slate-800 flex flex-col md:flex-row gap-3">
+                        <button
+                            onclick="alert('Funcionalidad de Preparaciones próximamente (Service Tag: ' + currentSelectedTag + ')')"
+                            class="w-full md:flex-1 bg-brand hover:bg-emerald-500 text-white font-bold py-3 rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2">
+                            <i data-lucide="wrench" class="w-4 h-4"></i>
+                            <span>PREPARACIONES</span>
+                        </button>
+                        <button onclick="closeDeviceModal()"
+                            class="w-full md:px-6 bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 md:py-0 rounded-2xl transition-all">
+                            CERRAR
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings / Password Change Modal -->
+            <div id="settingsModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+                <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onclick="closeSettingsModal()"></div>
+                <div class="glass w-full max-w-sm rounded-3xl p-8 shadow-2xl relative animate-in zoom-in duration-300">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="bg-brand/20 p-2 rounded-lg text-brand">
+                            <i data-lucide="key-round" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white">Seguridad</h3>
+                            <p class="text-[10px] text-slate-400 uppercase tracking-widest">Cambiar Contraseña</p>
+                        </div>
+                    </div>
+
+                    <form id="changePasswordForm" class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Nueva
+                                Contraseña</label>
+                            <input type="password" id="newPassword" required placeholder="Mín. 6 caracteres"
+                                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-brand outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Confirmar
+                                Contraseña</label>
+                            <input type="password" id="confirmPassword" required placeholder="Repite la contraseña"
+                                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-brand outline-none transition-all">
+                        </div>
+                        <div id="passErrorMessage"
+                            class="hidden text-rose-500 text-[10px] font-bold text-center bg-rose-500/10 py-2 rounded-lg">
+                        </div>
+
+                        <div class="flex gap-2 pt-2">
+                            <button type="button" onclick="closeSettingsModal()"
+                                class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl transition-all">
+                                CANCELAR
+                            </button>
+                            <button type="submit" id="updatePassBtn"
+                                class="flex-1 bg-brand hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg">
+                                ACTUALIZAR
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
     </main>
 
     <script>
@@ -301,8 +724,12 @@
         const SUPABASE_URL = "https://ytwwbhwlofycqdshbmqo.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0d3diaHdsb2Z5Y3Fkc2hibXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5OTc1MTgsImV4cCI6MjA4NzU3MzUxOH0.z0CazrtNQqtg46osa50SjxCpw5aflYHEdmBKEwBxlQs";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
         let masterData = [];
+        let empMap = {}; // Mapa para búsquedas rápidas de Nombre Empleado
+        let currentPerfFilter = null;
+        let currentUpdateFilter = null;
+        let currentTypeFilter = null;
+        let currentSelectedTag = null; // Para vincular con el botón de Preparaciones
 
         async function checkAuth() {
             const { data: { session } } = await supabaseClient.auth.getSession();
@@ -311,8 +738,9 @@
                 return;
             }
 
+            // Check for Master Admin
             if (session.user.email === 'ctorres@gtepeyac.com') {
-                document.getElementById('adminBtn')?.classList.remove('hidden');
+                document.getElementById('adminBtn').classList.remove('hidden');
             }
 
             fetchData();
@@ -320,9 +748,10 @@
 
         function toggleAdminPanel() {
             const panel = document.getElementById('adminPanel');
-            panel?.classList.toggle('hidden');
+            panel.classList.toggle('hidden');
         }
 
+        // Logic to create users (Admin only)
         document.getElementById('createUserForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('newEmail').value;
@@ -335,11 +764,12 @@
             status.classList.add('hidden');
 
             try {
+                // SignUp registers the user and triggers the confirmation email if enabled in Supabase
                 const { error } = await supabaseClient.auth.signUp({
                     email,
                     password,
                     options: {
-                        emailRedirectTo: window.location.href
+                        emailRedirectTo: window.location.href // Redirect back to dashboard after verification
                     }
                 });
 
@@ -364,8 +794,62 @@
 
         async function handleLogout() {
             await supabaseClient.auth.signOut();
-            window.location.href = 'AppDetectaEqTPY_login.html';
+            window.location.href = 'index.html';
         }
+
+        // Settings Modal Logic
+        function openSettingsModal() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.add('hidden');
+            document.getElementById('changePasswordForm').reset();
+            document.getElementById('passErrorMessage').classList.add('hidden');
+        }
+
+        document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newPass = document.getElementById('newPassword').value;
+            const confirmPass = document.getElementById('confirmPassword').value;
+            const btn = document.getElementById('updatePassBtn');
+            const errorEl = document.getElementById('passErrorMessage');
+
+            if (newPass !== confirmPass) {
+                errorEl.innerText = 'Las contraseñas no coinciden';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            if (newPass.length < 6) {
+                errorEl.innerText = 'La contraseña debe tener al menos 6 caracteres';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = 'ACTUALIZANDO...';
+            errorEl.classList.add('hidden');
+
+            try {
+                const { error } = await supabaseClient.auth.updateUser({
+                    password: newPass
+                });
+
+                if (error) throw error;
+
+                // Success
+                alert('Contraseña actualizada correctamente');
+                closeSettingsModal();
+            } catch (err) {
+                console.error(err);
+                errorEl.innerText = 'Error: ' + err.message;
+                errorEl.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'ACTUALIZAR';
+            }
+        });
 
         async function fetchAllRecords(table, selectParams, orderParams = null) {
             let allData = [];
@@ -394,23 +878,55 @@
             document.getElementById('tableBody').innerHTML = '';
 
             try {
-                const data = await fetchAllRecords('computer_tracking', '*', { col: 'FechaActualizacion', asc: false });
-                masterData = data;
+                const [trackingData, empData] = await Promise.all([
+                    fetchAllRecords('computer_tracking', '*', { col: 'FechaActualizacion', asc: false }),
+                    fetchAllRecords('TablaEmpleados', 'NumeroEmpleado, Nombre')
+                ]);
+
+                // Build Empleado Map: { "1234": "JUAN PEREZ", ... }
+                empMap = {};
+                if (empData) {
+                    empData.forEach(emp => {
+                        empMap[emp.NumeroEmpleado] = emp.Nombre;
+                    });
+                }
+
+                masterData = trackingData;
+                updateFilterDatalists(masterData);
                 applyFilters();
-                updateStats(data);
+                updateStats(masterData);
 
             } catch (err) {
                 console.error("Error fetching data:", err);
-                alert("Error al cargar datos de Supabase");
             } finally {
                 document.getElementById('loading').classList.add('hidden');
             }
         }
 
         function getPerf(item) {
-            if (item.TipoHD === 'HDD' || item.ram_gb <= 4) return { dot: 'bg-rose-500', text: 'text-rose-500', l: 'Bajo' };
-            if (item.ram_gb <= 8) return { dot: 'bg-amber-500', text: 'text-amber-500', l: 'Medio' };
-            return { dot: 'bg-emerald-500', text: 'text-emerald-500', l: 'Excelente' };
+            let reasons = [];
+            const osRaw = item.SistemaOperativo || item.SO || '';
+            const isHDD = (item.TipoHD || '').includes('HDD');
+            const isOSOld = !isOSUpdated(osRaw);
+            const isDiskFull = (item.pct_disco || 0) > 80;
+            const isLowRam = (item.ram_gb || 0) <= 4;
+
+            if (isHDD) reasons.push("Disco Lento (HDD)");
+            if (isOSOld) reasons.push("SO Desactualizado");
+            if (isDiskFull) reasons.push("Espacio Crítico (>80%)");
+            if (isLowRam) reasons.push("Poca RAM (<=4GB)");
+
+            if (reasons.length > 0) {
+                return {
+                    dot: 'bg-rose-500',
+                    text: 'text-rose-500',
+                    l: 'Bajo',
+                    title: `${reasons.join(', ')}`
+                };
+            }
+
+            if (item.ram_gb <= 8) return { dot: 'bg-amber-500', text: 'text-amber-500', l: 'Medio', title: 'Equilibrado' };
+            return { dot: 'bg-emerald-500', text: 'text-emerald-500', l: 'Excelente', title: 'Excelente estado' };
         }
 
         function renderData(items) {
@@ -418,66 +934,165 @@
             tableBody.innerHTML = items.map(item => {
                 const p = getPerf(item);
                 const batCol = item.Saludbateria < 70 ? 'text-rose-400' : 'text-emerald-400';
-                const dskCol = item.pct_disco > 80 ? 'text-rose-400' : 'text-slate-400';
-                const bitText = item.bitlokerEstado === 1 ? 'Si' : 'No';
+                const dskCol = item.pct_disco > 80 ? 'text-rose-400' : (item.pct_disco > 60 ? 'text-amber-400' : 'text-emerald-400');
+                const empName = empMap[item.NumeroEmpleado] || 'SIN ASIGNAR';
+
+                const onClickAction = `onclick="showDeviceInfo('${item.ServiceTag}')"`;
+
                 return `
                 <tr class="hover:bg-slate-800/30 transition-colors group">
-                    <td class="p-4">
-                        <div class="font-bold text-brand">${item.ServiceTag || 'S/N'}</div>
-                        <div class="text-[10px] text-slate-500 mt-0.5">${item.NombreEquipo || 'PC'} | ${item.Marca || ''}</div>
-                        <div class="text-[10px] text-slate-500 font-bold uppercase mt-0.5">${item.TipoEquipo || 'Equipo'}</div>
+                    <td class="p-2 md:p-4">
+                        <!-- Desktop View: Service Tag alone -->
+                        <div ${onClickAction} class="hidden md:block font-bold text-brand text-sm cursor-pointer hover:underline decoration-brand/50 decoration-2 underline-offset-4 transition-all">${item.ServiceTag || 'S/N'}</div>
+                        <!-- Mobile View: Service Tag + Tipo Equipo (White) -->
+                        <div ${onClickAction} class="md:hidden flex items-center gap-2 cursor-pointer">
+                            <span class="font-bold text-brand text-sm hover:underline decoration-brand/50">${item.ServiceTag || 'S/N'}</span>
+                            <span class="text-[10px] text-white font-bold uppercase mt-0.5">${item.TipoEquipo || 'Equipo'}</span>
+                        </div>
+                        
+                        <div class="text-xs text-slate-400 font-medium line-clamp-2 mt-0.5">${empName}</div>
+                        
+                        <!-- Desktop View: Tipo Equipo in Gray -->
+                        <div class="hidden md:block text-[10px] text-slate-500 font-bold uppercase mt-0.5">${item.TipoEquipo || 'Equipo'}</div>
+                        <!-- Mobile View: Correo -->
+                        <div class="md:hidden text-[10px] text-slate-500 mt-0.5 line-clamp-1">${item.correo || ''}</div>
                     </td>
-                    <td class="p-4">
+                    <td class="hidden md:table-cell p-4">
                         <div class="font-medium text-slate-200">${item.NumeroEmpleado || '---'}</div>
-                        <div class="text-xs text-slate-500">${item.correo || ''}</div>
+                        <div class="text-xs text-slate-500 mt-0.5">${item.correo || ''}</div>
                     </td>
-                    <td class="p-4">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="text-[10px] font-bold uppercase tracking-wider ${p.text}">
-                                Performance
-                            </span>
+                    <td class="p-2 md:p-4">
+                        <div class="text-xs md:text-xs font-bold text-slate-200">${item.cpu || 'CPU'} | ${item.ram_gb || '0'}GB</div>
+                        <div title="${p.title}" 
+                             onclick="toggleMobileTooltip(event, '${p.title}')"
+                             oncontextmenu="event.preventDefault(); return false;"
+                             class="text-[10px] md:text-[10px] font-bold ${p.text} uppercase tracking-tighter cursor-help select-none md:no-underline perf-link">Perf: ${p.l}</div>
+                    </td>
+                    <td class="hidden md:table-cell p-4">
+                        <div class="text-[10px] text-slate-500">Bat: <span class="${batCol}">${item.Saludbateria || 100}%</span></div>
+                        <div class="text-[10px] text-slate-500">Disco: <span class="text-slate-200 font-bold">${item.disk_total_gb || 0} GB</span></div>
+                        <div class="text-[10px] text-slate-500 mt-0.5"><span class="${dskCol}">${item.pct_disco || 0}%</span> <span class="${(item.TipoHD || '').includes('HDD') ? 'text-rose-500 font-black' : 'text-white font-bold'}">${item.TipoHD || ''}</span></div>
+                    </td>
+                    <td class="p-2 md:p-4 text-right">
+                        <!-- Desktop View: OS (Color Coded) + Date -->
+                        <div class="hidden md:block">
+                            <div class="font-bold text-[10px] mb-0.5 ${isOSUpdated(item.SistemaOperativo || item.SO) ? 'text-emerald-400' : 'text-rose-400'} uppercase truncate max-w-[140px] ml-auto">
+                                ${cleanOS(item.SistemaOperativo || item.SO)}
+                            </div>
+                            <div class="font-mono text-slate-300 text-[10px] md:text-sm">${formatDate(item.FechaActualizacion)}</div>
                         </div>
-                        <div class="text-xs font-bold text-slate-200">${item.cpu || 'CPU'} | ${item.TipoHD || 'DISK'}</div>
-                        <div class="text-[10px] text-slate-400 mt-1">${item.ram_gb || '0'} GB RAM</div>
-                    </td>
-                    <td class="p-4">
-                        <div class="grid grid-cols-2 gap-x-4 gap-y-1">
-                            <div class="text-[10px] text-slate-500">${item.TipoEquipo === 'Desktop' ? 'Salud Bat: <span class="text-slate-400 font-medium">Desktop</span>' : `Salud Bat: <span class="${batCol} font-bold">${item.Saludbateria || 100}%</span>`}</div>
-                            <div class="text-[10px] text-slate-500">%Disco: <span class="${dskCol} font-bold">${item.pct_disco || 0}%</span></div>
-                            <div class="text-[10px] text-slate-500">BIOS: <span class="text-slate-300 font-mono">${item.fechaBios || '--'}</span></div>
-                            <div class="text-[10px] text-slate-500">Seg: <span class="text-indigo-400 font-medium">${bitText}</span></div>
+                        <!-- Mobile View -->
+                        <div class="md:hidden flex flex-col items-end mt-1">
+                            <div class="text-[11px] font-bold text-slate-200">${item.disk_total_gb || 0} GB</div>
+                            <div class="text-[10px] font-bold ${dskCol} mt-0.5">${item.pct_disco || 0}%</div>
+                            <div class="text-[9px] font-black mt-0.5 ${(item.TipoHD || '').includes('HDD') ? 'text-rose-500' : 'text-white'}">${item.TipoHD || ''}</div>
                         </div>
                     </td>
-                    <td class="p-4">
-                        <div class="text-xs font-medium max-w-[150px] truncate">${item.Ubicacion || 'Remoto'}</div>
-                        <div class="text-[10px] text-slate-500 font-mono">${item.public_ip || '---'}</div>
-                    </td>
-                    <td class="p-4 text-right">
-                        <div class="text-xs font-mono text-slate-300">${formatDate(item.FechaActualizacion)}</div>
-                        <div class="text-[10px] text-emerald-500 opacity-70">Arizona Time</div>
-                    </td>
-                </tr>`;
+                </tr > `;
             }).join('');
             lucide.createIcons();
         }
 
+        function showDeviceInfo(tag) {
+            const item = masterData.find(i => i.ServiceTag === tag);
+            if (!item) return;
+
+            currentSelectedTag = tag;
+            const empName = empMap[item.NumeroEmpleado] || 'SIN ASIGNAR';
+            const batCol = item.Saludbateria < 70 ? 'text-rose-400' : 'text-emerald-400';
+            const dskCol = item.pct_disco > 80 ? 'text-rose-400' : (item.pct_disco > 60 ? 'text-amber-400' : 'text-emerald-400');
+
+            // Header info
+            document.getElementById('deviceName').innerText = item.NombreEquipo || 'Equipo Genérico';
+            document.getElementById('deviceTag').innerText = item.ServiceTag || 'S/N';
+            document.getElementById('deviceType').innerText = item.TipoEquipo || 'Equipo';
+
+            // Icon logic
+            const iconContainer = document.getElementById('deviceIcon');
+            const typeIcon = document.getElementById('deviceTypeIcon');
+            if (item.TipoEquipo === 'Laptop') {
+                typeIcon.setAttribute('data-lucide', 'laptop');
+                iconContainer.className = 'p-3 rounded-2xl bg-indigo-500/20 text-indigo-400';
+            } else {
+                typeIcon.setAttribute('data-lucide', 'monitor');
+                iconContainer.className = 'p-3 rounded-2xl bg-brand/20 text-brand';
+            }
+
+            // User block
+            document.getElementById('detailEmpName').innerText = empName;
+            document.getElementById('detailUser').innerText = item.NumeroEmpleado || item.Usuario || '---';
+            document.getElementById('detailEmail').innerText = item.correo || '---';
+
+            // Hardware block
+            document.getElementById('detailCPU').innerText = item.cpu || '---';
+            document.getElementById('detailRAM').innerText = (item.ram_gb || 0) + ' GB';
+            document.getElementById('detailModel').innerText = item.Modelo || '---';
+
+            // OS & Status
+            const osRaw = item.SistemaOperativo || item.SO || '---';
+            const osVal = cleanOS(osRaw);
+            const isUpdated = isOSUpdated(osRaw);
+            const osEl = document.getElementById('detailSO');
+            osEl.innerText = osVal;
+            osEl.className = `text-sm font-bold ${isUpdated ? 'text-emerald-400' : 'text-rose-400'}`;
+
+            document.getElementById('detailBat').innerText = (item.Saludbateria || 100) + '%';
+            document.getElementById('detailBat').className = `text-sm font-bold ${batCol}`;
+            document.getElementById('detailDate').innerText = formatDate(item.FechaActualizacion);
+
+            // OS Update logic
+            const soBadge = document.getElementById('soBadge');
+            if (isUpdated) {
+                soBadge.classList.remove('hidden');
+            } else {
+                soBadge.classList.add('hidden');
+            }
+
+            // Disk block
+            const hdType = item.TipoHD || '';
+            const hdColor = hdType.includes('HDD') ? 'text-rose-500' : 'text-white';
+            document.getElementById('detailDiskTotal').innerHTML = `${item.disk_total_gb || 0} GB <span class="ml-2 ${hdColor} font-black">${hdType}</span>`;
+            document.getElementById('detailDiskPct').innerText = (item.pct_disco || 0) + '%';
+            document.getElementById('detailDiskBar').style.width = (item.pct_disco || 0) + '%';
+            document.getElementById('detailDiskPct').className = `text-lg font-black ${dskCol} leading-none`;
+
+            document.getElementById('deviceModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeDeviceModal() {
+            document.getElementById('deviceModal').classList.add('hidden');
+        }
+
         function updateStats(data) {
             document.getElementById('stat-total').innerText = data.length;
-            document.getElementById('stat-laptops').innerText = data.filter(i => i.TipoEquipo === 'Laptop').length;
-            document.getElementById('stat-desktops').innerText = data.filter(i => i.TipoEquipo === 'Desktop').length;
 
-            // Stats de Performance (Semáforo)
-            const perfR = data.filter(i => i.TipoHD === 'HDD' || i.ram_gb <= 4).length;
-            const perfY = data.filter(i => i.TipoHD !== 'HDD' && i.ram_gb > 4 && i.ram_gb <= 8).length;
-            const perfG = data.filter(i => i.TipoHD !== 'HDD' && i.ram_gb > 8).length;
+            const perfR = data.filter(i => getPerf(i).l === 'Bajo').length;
+            const perfY = data.filter(i => getPerf(i).l === 'Medio').length;
+            const perfG = data.filter(i => getPerf(i).l === 'Excelente').length;
+
+            if (document.getElementById('stat-perf-g-m')) {
+                document.getElementById('stat-perf-g-m').innerText = perfG;
+                document.getElementById('stat-perf-y-m').innerText = perfY;
+                document.getElementById('stat-perf-r-m').innerText = perfR;
+            }
 
             document.getElementById('stat-perf-g').innerText = perfG;
             document.getElementById('stat-perf-y').innerText = perfY;
             document.getElementById('stat-perf-r').innerText = perfR;
 
-            // Calculate "Updated Today" based on Arizona Time (America/Phoenix)
-            const nowInAZ = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Phoenix' }).format(new Date());
+            const laptCount = data.filter(i => i.TipoEquipo === 'Laptop').length;
+            const deskCount = data.filter(i => i.TipoEquipo === 'Desktop').length;
+            
+            document.getElementById('stat-laptops').innerText = laptCount;
+            document.getElementById('stat-desktops').innerText = deskCount;
 
+            if (document.getElementById('stat-laptops-m')) {
+                document.getElementById('stat-laptops-m').innerText = laptCount;
+                document.getElementById('stat-desktops-m').innerText = deskCount;
+            }
+
+            const nowInAZ = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Phoenix' }).format(new Date());
             const todayUpdates = data.filter(item => {
                 if (!item.FechaActualizacion) return false;
                 const itemDateAZ = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Phoenix' }).format(new Date(item.FechaActualizacion));
@@ -488,20 +1103,35 @@
             document.getElementById('stat-offline').innerText = data.length - todayUpdates.length;
 
             if (data.length > 0) {
-                document.getElementById('stat-last').innerText = formatDate(data[0].FechaActualizacion);
+                const lastTime = formatDate(data[0].FechaActualizacion);
+                document.getElementById('stat-last').innerText = lastTime;
+                if (document.getElementById('stat-last-mobile')) {
+                    document.getElementById('stat-last-mobile').innerText = lastTime;
+                }
             }
+        }
+
+        function cleanOS(str) {
+            if (!str) return "---";
+            return str.replace(/Microsoft /g, '').replace(/Windows/g, 'Windows');
+        }
+
+        function isOSUpdated(str) {
+            if (!str) return false;
+            // Heuristic: Windows 11 or Windows 10 versions 22H2/23H2 (Builds 19045+)
+            return str.includes('Windows 11') || str.includes('22H2') || str.includes('23H2') || str.includes('19045') || str.includes('22621') || str.includes('22631');
         }
 
         function formatDate(str) {
             if (!str) return "--";
             const date = new Date(str);
-            return date.toLocaleString('es-MX', {
-                day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
-            });
+            return date.toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
         }
 
-        let currentPerfFilter = null;
-        let currentUpdateFilter = null; // 'today', 'offline', null
+        function setTypeFilter(type) {
+            currentTypeFilter = type;
+            applyFilters();
+        }
 
         function setUpdateFilter(mode) {
             currentUpdateFilter = mode;
@@ -514,30 +1144,132 @@
         }
 
         function clearFilters() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('filterType').value = 'all';
+            document.querySelectorAll('.filter-input').forEach(input => input.value = '');
             document.getElementById('filterDisk').value = 'all';
             currentPerfFilter = null;
             currentUpdateFilter = null;
+            currentTypeFilter = null;
             applyFilters();
         }
 
+        function toggleFilters() {
+            const container = document.getElementById('filterContainer');
+            const wrapper = document.getElementById('filterWrapper');
+            const chev = document.getElementById('filterChevron');
+            
+            // Toggle classes for height and opacity
+            if (container.classList.contains('max-h-[1000px]')) {
+                // Hide
+                container.classList.remove('max-h-[1000px]', 'opacity-100');
+                container.classList.add('max-h-0', 'opacity-0');
+                container.classList.remove('mt-3');
+                wrapper.classList.remove('p-4');
+                wrapper.classList.add('py-1', 'px-4');
+                chev.classList.add('rotate-180');
+            } else {
+                // Show
+                container.classList.remove('max-h-0', 'opacity-0');
+                container.classList.add('max-h-[1000px]', 'opacity-100');
+                container.classList.add('mt-3');
+                wrapper.classList.remove('py-1', 'px-4');
+                wrapper.classList.add('p-4');
+                chev.classList.remove('rotate-180');
+                
+                // Mobile auto-scroll logic
+                if (window.innerWidth < 768) {
+                    setTimeout(() => {
+                        wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 350); // Give time for the container expansion transition to finish
+                }
+            }
+        }
+
+        let filterOptionsData = {};
+
+        function updateFilterDatalists(data) {
+            const getUnique = (arr) => [
+                ...new Set(arr.filter(Boolean).map(item => String(item).trim().toUpperCase()))
+            ].sort();
+            
+            filterOptionsData = {
+                fEmpresa: getUnique(data.map(i => i.Empresa)),
+                fDivision: getUnique(data.map(i => i.Division)),
+                fSucursal: getUnique(data.map(i => i.Sucursal)),
+                fArea: getUnique(data.map(i => i.Area)),
+                fNoEmpleado: getUnique(data.map(i => i.NumeroEmpleado)),
+                fServiceTag: getUnique(data.map(i => i.ServiceTag)),
+                fCorreo: getUnique(data.map(i => i.correo)),
+                fNombre: getUnique(data.map(i => empMap[i.NumeroEmpleado] || 'SIN ASIGNAR'))
+            };
+        }
+
+        function renderCustomDropdown(inputId) {
+            const input = document.getElementById(inputId);
+            const dd = document.getElementById('dd-' + inputId);
+            if (!dd) return;
+
+            const val = input.value.toLowerCase();
+            const opts = filterOptionsData[inputId] || [];
+            const filtered = opts.filter(o => String(o).toLowerCase().includes(val));
+
+            if (filtered.length === 0) {
+                dd.innerHTML = `<div class="px-3 py-2 text-[10px] text-slate-500 italic">Sin resultados</div>`;
+            } else {
+                dd.innerHTML = filtered.slice(0, 50).map(o => `
+                    <div class="px-3 py-2 text-xs text-slate-300 hover:bg-brand hover:text-white cursor-pointer transition-colors"
+                         onmousedown="event.preventDefault(); selectFilterOption('${inputId}', '${String(o).replace(/'/g, "\\'")}')">
+                        ${o}
+                    </div>
+                `).join('');
+            }
+            
+            // Hide all other dropdowns
+            document.querySelectorAll('[id^="dd-"]').forEach(el => {
+                if(el.id !== 'dd-' + inputId) el.classList.add('hidden');
+            });
+            dd.classList.remove('hidden');
+        }
+
+        function selectFilterOption(inputId, value) {
+            const input = document.getElementById(inputId);
+            input.value = value;
+            document.getElementById('dd-' + inputId).classList.add('hidden');
+            applyFilters();
+        }
+
+        // Close dropdowns on outside click
+        document.addEventListener('mousedown', (e) => {
+            if (!e.target.closest('.group')) {
+                document.querySelectorAll('[id^="dd-"]').forEach(el => el.classList.add('hidden'));
+            }
+        });
+
         function applyFilters() {
-            const searchVal = document.getElementById('searchInput').value.toLowerCase();
-            const typeVal = document.getElementById('filterType').value;
+            const fEmpresa = document.getElementById('fEmpresa').value.toLowerCase();
+            const fDivision = document.getElementById('fDivision').value.toLowerCase();
+            const fSucursal = document.getElementById('fSucursal').value.toLowerCase();
+            const fArea = document.getElementById('fArea').value.toLowerCase();
+            const fNoEmp = document.getElementById('fNoEmpleado').value.toLowerCase();
+            const fTag = document.getElementById('fServiceTag').value.toLowerCase();
+            const fCorreo = document.getElementById('fCorreo').value.toLowerCase();
+            const fNombre = document.getElementById('fNombre').value.toLowerCase();
             const diskVal = document.getElementById('filterDisk').value;
 
             const filtered = masterData.filter(item => {
-                const searchStr = `${item.ServiceTag} ${item.NumeroEmpleado} ${item.correo} ${item.Empresa} ${item.Division} ${item.Sucursal}`.toLowerCase();
-                const matchesSearch = !searchVal || searchStr.includes(searchVal);
-                const matchesType = typeVal === 'all' || item.TipoEquipo === typeVal;
+                const empName = empMap[item.NumeroEmpleado] || 'SIN ASIGNAR';
+                
+                const mEmp = !fEmpresa || (item.Empresa && item.Empresa.toLowerCase().includes(fEmpresa));
+                const mDiv = !fDivision || (item.Division && item.Division.toLowerCase().includes(fDivision));
+                const mSuc = !fSucursal || (item.Sucursal && item.Sucursal.toLowerCase().includes(fSucursal));
+                const mArea = !fArea || (item.Area && item.Area.toLowerCase().includes(fArea));
+                const mNoE = !fNoEmp || (item.NumeroEmpleado && String(item.NumeroEmpleado).toLowerCase().includes(fNoEmp));
+                const mTag = !fTag || (item.ServiceTag && item.ServiceTag.toLowerCase().includes(fTag));
+                const mCor = !fCorreo || (item.correo && item.correo.toLowerCase().includes(fCorreo));
+                const mNom = !fNombre || empName.toLowerCase().includes(fNombre);
 
-                let matchesDisk = true;
-                if (diskVal !== 'all') {
-                    if (diskVal === 'SSD') matchesDisk = item.TipoHD === 'SSD';
-                    else if (diskVal === 'HDD') matchesDisk = item.TipoHD === 'HDD';
-                    else matchesDisk = item.TipoHD !== 'SSD' && item.TipoHD !== 'HDD';
-                }
+                const matchesSearch = mEmp && mDiv && mSuc && mArea && mNoE && mTag && mCor && mNom;
+                const matchesType = !currentTypeFilter || item.TipoEquipo === currentTypeFilter;
+                let matchesDisk = diskVal === 'all' || item.TipoHD === diskVal;
 
                 let matchesPerf = true;
                 if (currentPerfFilter) {
@@ -557,26 +1289,30 @@
                 return matchesSearch && matchesType && matchesDisk && matchesPerf && matchesUpdate;
             });
 
-            updateFilterIndicator(searchVal, typeVal, diskVal, filtered.length);
+            updateFilterIndicator(diskVal, filtered.length);
+            updateFilterDatalists(filtered);
             renderData(filtered);
         }
 
-        function updateFilterIndicator(search, type, disk, count) {
+        function updateFilterIndicator(disk, count) {
             const indicator = document.getElementById('filterIndicator');
             const textEl = document.getElementById('filterText');
             const countEl = document.getElementById('filterCount');
 
             let activeFilters = [];
-            if (search) activeFilters.push(`"${search}"`);
-            if (type !== 'all') activeFilters.push(type);
-            if (disk !== 'all') activeFilters.push(`Disco ${disk}`);
+            let advancedVals = [];
+            document.querySelectorAll('.filter-input').forEach(i => {
+                if(i.value) advancedVals.push(i.value);
+            });
+            
+            if (advancedVals.length > 0) activeFilters.push(advancedVals.join(' / '));
+            if (currentTypeFilter) activeFilters.push(currentTypeFilter);
+            if (disk !== 'all') activeFilters.push(disk);
             if (currentPerfFilter) {
-                const names = { 'G': 'Performance Excelente', 'Y': 'Performance Medio', 'R': 'Performance Bajo' };
-                activeFilters.push(names[currentPerfFilter]);
+                const names = { 'G': 'Excelente', 'Y': 'Medio', 'R': 'Bajo' };
+                activeFilters.push(`Perf: ${names[currentPerfFilter]}`);
             }
-            if (currentUpdateFilter) {
-                activeFilters.push(currentUpdateFilter === 'today' ? 'Actualizados Hoy' : 'Pendientes de Actualizar (Fuera de línea)');
-            }
+            if (currentUpdateFilter) activeFilters.push(currentUpdateFilter === 'today' ? 'Online' : 'Offline');
 
             if (activeFilters.length > 0) {
                 indicator.classList.remove('hidden');
@@ -587,12 +1323,33 @@
             }
         }
 
-        // Listeners for combined filtering
-        document.getElementById('searchInput').addEventListener('input', applyFilters);
-        document.getElementById('filterType').addEventListener('change', applyFilters);
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./AppDetectaEqTPY_sw.js')
+                    .then(reg => console.log('SW Registered', reg))
+                    .catch(err => console.log('SW Error', err));
+            });
+        }
+
+        document.querySelectorAll('.filter-input').forEach(input => {
+            input.addEventListener('input', () => {
+                applyFilters();
+                renderCustomDropdown(input.id);
+            });
+            input.addEventListener('focus', () => {
+                renderCustomDropdown(input.id);
+            });
+            input.addEventListener('blur', () => {
+                // Short delay to allow click event to register
+                setTimeout(() => {
+                    const dd = document.getElementById('dd-' + input.id);
+                    if (dd) dd.classList.add('hidden');
+                }, 150);
+            });
+        });
         document.getElementById('filterDisk').addEventListener('change', applyFilters);
 
-        // Init
         window.onload = () => {
             lucide.createIcons();
             checkAuth();

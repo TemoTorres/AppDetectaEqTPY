@@ -97,7 +97,6 @@
             border-right: 6px solid transparent;
             border-top: 6px solid rgba(15, 23, 42, 0.95);
         }
-
         .perf-link {
             -webkit-touch-callout: none;
             -webkit-user-select: none;
@@ -106,6 +105,22 @@
             text-underline-offset: 2px;
             text-decoration-thickness: 1px;
             text-decoration-style: dotted;
+        }
+
+        /* Custom scrollbar for dark dropdowns */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b; 
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
         }
     </style>
     <script>
@@ -381,21 +396,82 @@
             </div>
         </div>
 
-        <!-- Search & Filters -->
-        <div class="mb-4 flex flex-col md:flex-row gap-2 md:gap-4">
-            <div class="relative flex-1">
-                <i data-lucide="search"
-                    class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-slate-500"></i>
-                <input type="text" id="searchInput" placeholder="Serie, Empleado, Empresa..."
-                    class="w-full bg-slate-800 border-none rounded-xl py-2 md:py-3 pl-10 pr-4 text-xs md:text-sm focus:ring-2 focus:ring-green-500 transition-all outline-none">
+        <!-- Advanced Filters -->
+        <div id="filterWrapper" class="scroll-mt-28 mb-4 bg-slate-800/40 border border-slate-700/50 rounded-2xl py-1 px-4 shadow-lg animate-in zoom-in duration-500 transition-all">
+            <div class="flex justify-between items-center cursor-pointer group select-none" onclick="toggleFilters()" title="Ocultar/Mostrar Filtros">
+                <h3 class="text-xs font-black text-slate-300 uppercase tracking-widest flex items-center gap-2 transition-colors">
+                    <div class="p-1.5 bg-brand/20 rounded-lg group-hover:bg-brand/30 transition-colors flex items-center justify-center">
+                        <i data-lucide="list-filter" class="w-4 h-4 text-brand"></i>
+                    </div>
+                    Búsqueda Avanzada
+                </h3>
+                <div class="p-1 rounded-lg hover:bg-slate-700/50 transition-colors">
+                    <i data-lucide="chevron-up" id="filterChevron" class="w-4 h-4 text-slate-400 rotate-180 transition-transform duration-300"></i>
+                </div>
             </div>
-            <div class="flex gap-2 w-full md:w-auto">
-                <select id="filterDisk"
-                    class="flex-1 bg-slate-800 rounded-xl px-3 py-2 md:px-4 md:py-3 text-[10px] md:text-sm border-none outline-none focus:ring-2 focus:ring-green-500 cursor-pointer">
-                    <option value="all">Discos: Todos</option>
-                    <option value="SSD">SSD</option>
-                    <option value="HDD">HDD</option>
+            
+            <div id="filterContainer" class="transition-all duration-300 overflow-hidden max-h-0 opacity-0">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <!-- Empresa -->
+                <div class="flex flex-col relative group">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Empresa</label>
+                    <input type="text" id="fEmpresa" autocomplete="off" placeholder="Todas..." class="filter-input bg-slate-900 border border-slate-700/50 hover:border-brand/50 rounded-xl px-3 py-2.5 text-xs text-white focus:ring-1 focus:ring-brand focus:border-brand outline-none w-full transition-all placeholder-slate-600">
+                    <div id="dd-fEmpresa" class="hidden absolute top-[calc(100%+4px)] left-0 w-full max-h-48 overflow-y-auto bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl z-[60] py-1 custom-scrollbar"></div>
+                </div>
+                <!-- División -->
+                <div class="flex flex-col relative group">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">División</label>
+                    <input type="text" id="fDivision" autocomplete="off" placeholder="Todas..." class="filter-input bg-slate-900 border border-slate-700/50 hover:border-brand/50 rounded-xl px-3 py-2.5 text-xs text-white focus:ring-1 focus:ring-brand focus:border-brand outline-none w-full transition-all placeholder-slate-600">
+                    <div id="dd-fDivision" class="hidden absolute top-[calc(100%+4px)] left-0 w-full max-h-48 overflow-y-auto bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl z-[60] py-1 custom-scrollbar"></div>
+                </div>
+                <!-- Sucursal -->
+                <div class="flex flex-col relative group">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Sucursal</label>
+                    <input type="text" id="fSucursal" autocomplete="off" placeholder="Todas..." class="filter-input bg-slate-900 border border-slate-700/50 hover:border-brand/50 rounded-xl px-3 py-2.5 text-xs text-white focus:ring-1 focus:ring-brand focus:border-brand outline-none w-full transition-all placeholder-slate-600">
+                    <div id="dd-fSucursal" class="hidden absolute top-[calc(100%+4px)] left-0 w-full max-h-48 overflow-y-auto bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl z-[60] py-1 custom-scrollbar"></div>
+                </div>
+                <!-- Area -->
+                <div class="flex flex-col relative group">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Área</label>
+                    <input type="text" id="fArea" autocomplete="off" placeholder="Todas..." class="filter-input bg-slate-900 border border-slate-700/50 hover:border-brand/50 rounded-xl px-3 py-2.5 text-xs text-white focus:ring-1 focus:ring-brand focus:border-brand outline-none w-full transition-all placeholder-slate-600">
+                    <div id="dd-fArea" class="hidden absolute top-[calc(100%+4px)] left-0 w-full max-h-48 overflow-y-auto bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl z-[60] py-1 custom-scrollbar"></div>
+                </div>
+                <!-- No. Empleado -->
+                <div class="flex flex-col relative group">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">No. Empleado</label>
+                    <input type="text" id="fNoEmpleado" autocomplete="off" placeholder="Todos..." class="filter-input bg-slate-900 border border-slate-700/50 hover:border-brand/50 rounded-xl px-3 py-2.5 text-xs text-white focus:ring-1 focus:ring-brand focus:border-brand outline-none w-full transition-all placeholder-slate-600">
+                    <div id="dd-fNoEmpleado" class="hidden absolute top-[calc(100%+4px)] left-0 w-full max-h-48 overflow-y-auto bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl z-[60] py-1 custom-scrollbar"></div>
+                </div>
+                <!-- ServiceTag -->
+                <div class="flex flex-col relative group">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">ServiceTag / ST</label>
+                    <input type="text" id="fServiceTag" autocomplete="off" placeholder="Todos..." class="filter-input bg-slate-900 border border-slate-700/50 hover:border-brand/50 rounded-xl px-3 py-2.5 text-xs text-white focus:ring-1 focus:ring-brand focus:border-brand outline-none w-full transition-all placeholder-slate-600">
+                    <div id="dd-fServiceTag" class="hidden absolute top-[calc(100%+4px)] left-0 w-full max-h-48 overflow-y-auto bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl z-[60] py-1 custom-scrollbar"></div>
+                </div>
+                <!-- Correo -->
+                <div class="flex flex-col relative group">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Correo</label>
+                    <input type="email" id="fCorreo" autocomplete="off" placeholder="Todos..." class="filter-input bg-slate-900 border border-slate-700/50 hover:border-brand/50 rounded-xl px-3 py-2.5 text-xs text-white focus:ring-1 focus:ring-brand focus:border-brand outline-none w-full transition-all placeholder-slate-600">
+                    <div id="dd-fCorreo" class="hidden absolute top-[calc(100%+4px)] left-0 w-full max-h-48 overflow-y-auto bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl z-[60] py-1 custom-scrollbar"></div>
+                </div>
+                <!-- Nombre -->
+                <div class="flex flex-col relative group">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Nombre</label>
+                    <input type="text" id="fNombre" autocomplete="off" placeholder="Todos..." class="filter-input bg-slate-900 border border-slate-700/50 hover:border-brand/50 rounded-xl px-3 py-2.5 text-xs text-white focus:ring-1 focus:ring-brand focus:border-brand outline-none w-full transition-all placeholder-slate-600">
+                    <div id="dd-fNombre" class="hidden absolute top-[calc(100%+4px)] left-0 w-full max-h-48 overflow-y-auto bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl z-[60] py-1 custom-scrollbar"></div>
+                </div>
+            </div>
+            <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-700/30">
+                <select id="filterDisk" class="bg-slate-900 border border-slate-700/50 rounded-xl px-3 py-2 text-xs text-white outline-none focus:ring-1 focus:ring-brand cursor-pointer">
+                    <option value="all">Disco: Todos</option>
+                    <option value="SSD">Solo SSD</option>
+                    <option value="HDD">Solo HDD</option>
                 </select>
+                <button onclick="clearFilters()" class="bg-slate-900 hover:bg-rose-500/20 text-[10px] text-rose-400 font-black tracking-widest px-4 py-2 rounded-xl transition-all border border-slate-700/50 hover:border-rose-500/30 flex items-center gap-1.5 shadow-sm">
+                    <i data-lucide="filter-x" class="w-4 h-4"></i>
+                    LIMPIAR FILTROS
+                </button>
+            </div>
             </div>
         </div>
 
@@ -816,6 +892,7 @@
                 }
 
                 masterData = trackingData;
+                updateFilterDatalists(masterData);
                 applyFilters();
                 updateStats(masterData);
 
@@ -994,23 +1071,25 @@
             const perfY = data.filter(i => getPerf(i).l === 'Medio').length;
             const perfG = data.filter(i => getPerf(i).l === 'Excelente').length;
 
-            // Update Desktop IDs
-            if (document.getElementById('stat-laptops')) {
-                document.getElementById('stat-laptops').innerText = data.filter(i => i.TipoEquipo === 'Laptop').length;
-                document.getElementById('stat-desktops').innerText = data.filter(i => i.TipoEquipo === 'Desktop').length;
-            }
-            if (document.getElementById('stat-perf-g')) {
-                document.getElementById('stat-perf-g').innerText = perfG;
-                document.getElementById('stat-perf-y').innerText = perfY;
-                document.getElementById('stat-perf-r').innerText = perfR;
-            }
-            // Update Mobile IDs
-            if (document.getElementById('stat-laptops-m')) {
-                document.getElementById('stat-laptops-m').innerText = data.filter(i => i.TipoEquipo === 'Laptop').length;
-                document.getElementById('stat-desktops-m').innerText = data.filter(i => i.TipoEquipo === 'Desktop').length;
+            if (document.getElementById('stat-perf-g-m')) {
                 document.getElementById('stat-perf-g-m').innerText = perfG;
                 document.getElementById('stat-perf-y-m').innerText = perfY;
                 document.getElementById('stat-perf-r-m').innerText = perfR;
+            }
+
+            document.getElementById('stat-perf-g').innerText = perfG;
+            document.getElementById('stat-perf-y').innerText = perfY;
+            document.getElementById('stat-perf-r').innerText = perfR;
+
+            const laptCount = data.filter(i => i.TipoEquipo === 'Laptop').length;
+            const deskCount = data.filter(i => i.TipoEquipo === 'Desktop').length;
+            
+            document.getElementById('stat-laptops').innerText = laptCount;
+            document.getElementById('stat-desktops').innerText = deskCount;
+
+            if (document.getElementById('stat-laptops-m')) {
+                document.getElementById('stat-laptops-m').innerText = laptCount;
+                document.getElementById('stat-desktops-m').innerText = deskCount;
             }
 
             const nowInAZ = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Phoenix' }).format(new Date());
@@ -1065,7 +1144,7 @@
         }
 
         function clearFilters() {
-            document.getElementById('searchInput').value = '';
+            document.querySelectorAll('.filter-input').forEach(input => input.value = '');
             document.getElementById('filterDisk').value = 'all';
             currentPerfFilter = null;
             currentUpdateFilter = null;
@@ -1073,14 +1152,122 @@
             applyFilters();
         }
 
+        function toggleFilters() {
+            const container = document.getElementById('filterContainer');
+            const wrapper = document.getElementById('filterWrapper');
+            const chev = document.getElementById('filterChevron');
+            
+            // Toggle classes for height and opacity
+            if (container.classList.contains('max-h-[1000px]')) {
+                // Hide
+                container.classList.remove('max-h-[1000px]', 'opacity-100');
+                container.classList.add('max-h-0', 'opacity-0');
+                container.classList.remove('mt-3');
+                wrapper.classList.remove('p-4');
+                wrapper.classList.add('py-1', 'px-4');
+                chev.classList.add('rotate-180');
+            } else {
+                // Show
+                container.classList.remove('max-h-0', 'opacity-0');
+                container.classList.add('max-h-[1000px]', 'opacity-100');
+                container.classList.add('mt-3');
+                wrapper.classList.remove('py-1', 'px-4');
+                wrapper.classList.add('p-4');
+                chev.classList.remove('rotate-180');
+                
+                // Mobile auto-scroll logic
+                if (window.innerWidth < 768) {
+                    setTimeout(() => {
+                        wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 350); // Give time for the container expansion transition to finish
+                }
+            }
+        }
+
+        let filterOptionsData = {};
+
+        function updateFilterDatalists(data) {
+            const getUnique = (arr) => [
+                ...new Set(arr.filter(Boolean).map(item => String(item).trim().toUpperCase()))
+            ].sort();
+            
+            filterOptionsData = {
+                fEmpresa: getUnique(data.map(i => i.Empresa)),
+                fDivision: getUnique(data.map(i => i.Division)),
+                fSucursal: getUnique(data.map(i => i.Sucursal)),
+                fArea: getUnique(data.map(i => i.Area)),
+                fNoEmpleado: getUnique(data.map(i => i.NumeroEmpleado)),
+                fServiceTag: getUnique(data.map(i => i.ServiceTag)),
+                fCorreo: getUnique(data.map(i => i.correo)),
+                fNombre: getUnique(data.map(i => empMap[i.NumeroEmpleado] || 'SIN ASIGNAR'))
+            };
+        }
+
+        function renderCustomDropdown(inputId) {
+            const input = document.getElementById(inputId);
+            const dd = document.getElementById('dd-' + inputId);
+            if (!dd) return;
+
+            const val = input.value.toLowerCase();
+            const opts = filterOptionsData[inputId] || [];
+            const filtered = opts.filter(o => String(o).toLowerCase().includes(val));
+
+            if (filtered.length === 0) {
+                dd.innerHTML = `<div class="px-3 py-2 text-[10px] text-slate-500 italic">Sin resultados</div>`;
+            } else {
+                dd.innerHTML = filtered.slice(0, 50).map(o => `
+                    <div class="px-3 py-2 text-xs text-slate-300 hover:bg-brand hover:text-white cursor-pointer transition-colors"
+                         onmousedown="event.preventDefault(); selectFilterOption('${inputId}', '${String(o).replace(/'/g, "\\'")}')">
+                        ${o}
+                    </div>
+                `).join('');
+            }
+            
+            // Hide all other dropdowns
+            document.querySelectorAll('[id^="dd-"]').forEach(el => {
+                if(el.id !== 'dd-' + inputId) el.classList.add('hidden');
+            });
+            dd.classList.remove('hidden');
+        }
+
+        function selectFilterOption(inputId, value) {
+            const input = document.getElementById(inputId);
+            input.value = value;
+            document.getElementById('dd-' + inputId).classList.add('hidden');
+            applyFilters();
+        }
+
+        // Close dropdowns on outside click
+        document.addEventListener('mousedown', (e) => {
+            if (!e.target.closest('.group')) {
+                document.querySelectorAll('[id^="dd-"]').forEach(el => el.classList.add('hidden'));
+            }
+        });
+
         function applyFilters() {
-            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            const fEmpresa = document.getElementById('fEmpresa').value.toLowerCase();
+            const fDivision = document.getElementById('fDivision').value.toLowerCase();
+            const fSucursal = document.getElementById('fSucursal').value.toLowerCase();
+            const fArea = document.getElementById('fArea').value.toLowerCase();
+            const fNoEmp = document.getElementById('fNoEmpleado').value.toLowerCase();
+            const fTag = document.getElementById('fServiceTag').value.toLowerCase();
+            const fCorreo = document.getElementById('fCorreo').value.toLowerCase();
+            const fNombre = document.getElementById('fNombre').value.toLowerCase();
             const diskVal = document.getElementById('filterDisk').value;
 
             const filtered = masterData.filter(item => {
-                const empName = empMap[item.NumeroEmpleado] || '';
-                const searchStr = `${item.ServiceTag} ${item.NumeroEmpleado} ${empName} ${item.correo} `.toLowerCase();
-                const matchesSearch = !searchVal || searchStr.includes(searchVal);
+                const empName = empMap[item.NumeroEmpleado] || 'SIN ASIGNAR';
+                
+                const mEmp = !fEmpresa || (item.Empresa && item.Empresa.toLowerCase().includes(fEmpresa));
+                const mDiv = !fDivision || (item.Division && item.Division.toLowerCase().includes(fDivision));
+                const mSuc = !fSucursal || (item.Sucursal && item.Sucursal.toLowerCase().includes(fSucursal));
+                const mArea = !fArea || (item.Area && item.Area.toLowerCase().includes(fArea));
+                const mNoE = !fNoEmp || (item.NumeroEmpleado && String(item.NumeroEmpleado).toLowerCase().includes(fNoEmp));
+                const mTag = !fTag || (item.ServiceTag && item.ServiceTag.toLowerCase().includes(fTag));
+                const mCor = !fCorreo || (item.correo && item.correo.toLowerCase().includes(fCorreo));
+                const mNom = !fNombre || empName.toLowerCase().includes(fNombre);
+
+                const matchesSearch = mEmp && mDiv && mSuc && mArea && mNoE && mTag && mCor && mNom;
                 const matchesType = !currentTypeFilter || item.TipoEquipo === currentTypeFilter;
                 let matchesDisk = diskVal === 'all' || item.TipoHD === diskVal;
 
@@ -1102,17 +1289,23 @@
                 return matchesSearch && matchesType && matchesDisk && matchesPerf && matchesUpdate;
             });
 
-            updateFilterIndicator(searchVal, diskVal, filtered.length);
+            updateFilterIndicator(diskVal, filtered.length);
+            updateFilterDatalists(filtered);
             renderData(filtered);
         }
 
-        function updateFilterIndicator(search, disk, count) {
+        function updateFilterIndicator(disk, count) {
             const indicator = document.getElementById('filterIndicator');
             const textEl = document.getElementById('filterText');
             const countEl = document.getElementById('filterCount');
 
             let activeFilters = [];
-            if (search) activeFilters.push(search);
+            let advancedVals = [];
+            document.querySelectorAll('.filter-input').forEach(i => {
+                if(i.value) advancedVals.push(i.value);
+            });
+            
+            if (advancedVals.length > 0) activeFilters.push(advancedVals.join(' / '));
             if (currentTypeFilter) activeFilters.push(currentTypeFilter);
             if (disk !== 'all') activeFilters.push(disk);
             if (currentPerfFilter) {
@@ -1139,7 +1332,22 @@
             });
         }
 
-        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.querySelectorAll('.filter-input').forEach(input => {
+            input.addEventListener('input', () => {
+                applyFilters();
+                renderCustomDropdown(input.id);
+            });
+            input.addEventListener('focus', () => {
+                renderCustomDropdown(input.id);
+            });
+            input.addEventListener('blur', () => {
+                // Short delay to allow click event to register
+                setTimeout(() => {
+                    const dd = document.getElementById('dd-' + input.id);
+                    if (dd) dd.classList.add('hidden');
+                }, 150);
+            });
+        });
         document.getElementById('filterDisk').addEventListener('change', applyFilters);
 
         window.onload = () => {
